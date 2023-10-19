@@ -34,7 +34,7 @@ To train and test our lip reading system, we will employ the following data coll
 
 3. Extracting Data from Online Sources:
 
-    * We will also consider downloading YouTube videos that feature English speakers and extracting both voice and subtitle information. From these videos, we will extract images of the speakers' faces and lips. To facilitate this, we may utilize the "YouTube Faces with Facial Keypoints" dataset on [Kaggle link](https://www.kaggle.com/selfishgene/youtube-faces-with-facial-keypoints).
+    * We will also consider downloading YouTube videos that feature English speakers and extracting both voice and subtitle information. From these videos, we will extract images of the speakers' faces and lips. To facilitate this, we may utilize the "YouTube Faces with Facial Keypoints" dataset on [Kaggle link](https://www.kaggle.com/selfishgene/youtube-faces-with-facial-keypoints). Or we can write a script to download videos from youtube using the youtube API.
 
 ### B. Model Development:
 
@@ -50,9 +50,9 @@ Train the model using the annotated dataset to recognize and transcribe spoken w
 
     * We will split the dataset into training and testing sets.
     * We will use the training set to train the model and the testing set to evaluate the model's performance.
-3. Model Selection:
+3. Model Selection:(to be decided later)
 
-    * We will explore various deep learning models, including convolutional neural networks (CNNs) and recurrent neural networks (RNNs).such as Long Short-Term Memory(LSTM) networks.
+    * We will explore various deep learning models, including convolutional neural networks (CNNs) ; recurrent neural networks (RNNs).such as Long Short-Term Memory(LSTM) networks; Hybrid models that combine CNNs and RNNs; End-to-End Models: models that directly map the input to the output without any intermediate steps; 3D CNNs: models that can capture temporal information from video data.
     * We will select the model that yields the best performance on the testing set.
    
 
