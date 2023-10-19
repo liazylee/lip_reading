@@ -3,8 +3,7 @@
 ## I. Title: Lip Reading in English Using Machine Learning and Computer Vision
 
 ## II. Introduction:
-This research project aims to develop a lip reading system for the English language by leveraging machine learning and computer vision techniques. The primary objective is to enhance communication accessibility for the hearing impaired and explore applications in transcription, human-computer interaction, and security.
-
+The purpose of this research project is to harness the power of machine learning and computer vision technologies to advance the field of lip reading. Our primary objective is to develop and deploy robust, real-time systems capable of accurately transcribing spoken language by interpreting the visual cues provided by the movement of the lips. Lip reading has the potential to bridge communication gaps, making spoken language accessible to individuals with hearing impairments, enhancing security through speech recognition in challenging environments, and contributing to a wide range of applications.
 ## III. Research Question:
 How can machine learning and computer vision be used to accurately recognize and transcribe spoken English words from lip movements in real-time?
 
@@ -50,11 +49,20 @@ Train the model using the annotated dataset to recognize and transcribe spoken w
 
     * We will split the dataset into training and testing sets.
     * We will use the training set to train the model and the testing set to evaluate the model's performance.
-3. Model Selection:(to be decided later)
+3. Model Selection(to be decided later, after we have the dataset):
 
     * We will explore various deep learning models, including convolutional neural networks (CNNs) ; recurrent neural networks (RNNs).such as Long Short-Term Memory(LSTM) networks; Hybrid models that combine CNNs and RNNs; End-to-End Models: models that directly map the input to the output without any intermediate steps; 3D CNNs: models that can capture temporal information from video data.
     * We will select the model that yields the best performance on the testing set.
-   
+4. Model Training:
+5. Model Evaluation:
+6. Model Optimization:
+7. Combine Audio and Visual Cues:
+8. Ethical Considerations:
+9. Deployment:
+   * deploy the model on jetson nano. 
+10. Iterate and Improve:
+
+
 
 ### C. Performance Optimization:
 
@@ -74,6 +82,10 @@ We anticipate that this research will result in a machine learning-based lip rea
 ## IX. Conclusion:
 
 ## X. References:
+
+## XI. Description:
+
+The purpose of this research project is to harness the power of machine learning and computer vision technologies to advance the field of lip reading. Our primary objective is to develop and deploy robust, real-time systems capable of accurately transcribing spoken language by interpreting the visual cues provided by the movement of the lips. Lip reading has the potential to bridge communication gaps, making spoken language accessible to individuals with hearing impairments, enhancing security through speech recognition in challenging environments, and contributing to a wide range of applications.
 
 
 
