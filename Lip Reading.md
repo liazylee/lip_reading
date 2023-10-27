@@ -73,6 +73,93 @@ Implement techniques to handle variations in lighting and background.
 Assess the system's accuracy and real-time performance on a testing dataset.
 Conduct real-world testing in different environments and with diverse speakers.
 ## VI. Timeline:
+Weeks:                  1  |  2  |  3  |  4  |  5  |  6  |  7
+-------------------------------------------------------------
+
+Data Collection         [========]
+
+Model Development                [===============]
+
+Performance Optimization            [============]
+
+Evaluation                          [================]
+
+Report Writing                    [=======================]
+
+-------------------------------------------------------------
+Weeks:            1  |  2  |  3  |  4  |  5  |  6  |  7
+------------------------------------------------------
+Data Collection
+   - Set up recording equipment [====]
+   - Record video samples [====]
+   - Annotate collected data [====]
+   
+Model Development
+   - Data preprocessing [=======]
+   - Model architecture design [=======]
+   - Initial model training [===========]
+   - Model fine-tuning [===========]
+   
+Performance Optimization
+   - Implement lighting adjustments [=========]
+   - Optimize background handling [=========]
+   - Fine-tune hyperparameters [=========]
+   
+Evaluation
+   - Prepare the testing dataset [================]
+   - Assess recognition accuracy [================]
+   - Real-time performance testing [================]
+   
+Report Writing
+   - Summarize research findings [====================]
+   - Document methodology [====================]
+   - Present results and analysis [====================]
+------------------------------------------------------
+
+**Week 1: Data Collection**
+
+- In the first week, the focus is on data collection.
+  - **Set up recording equipment:** You'll set up the necessary recording equipment to capture video samples.
+  - **Record video samples:** You'll start recording video samples of English speakers.
+  - **Annotate collected data:** Simultaneously, you'll begin annotating the collected data to provide ground truth transcription.
+
+**Week 2: Data Collection (Continued)**
+
+- The second week continues data collection and annotation to ensure a comprehensive dataset.
+
+**Week 3: Model Development**
+
+- In the third week, the model development process begins.
+  - **Data preprocessing:** You'll prepare the collected data for training, including cleaning, alignment, and formatting.
+  - **Model architecture design:** You'll design the architecture of the deep learning model.
+  - **Initial model training:** The initial training of the model using the preprocessed data starts.
+  - **Model fine-tuning:** Fine-tuning of the model begins to enhance its performance.
+
+**Week 4: Model Development (Continued)**
+
+- The fourth week is a continuation of model development.
+
+**Week 5: Performance Optimization**
+
+- In the fifth week, the focus shifts to performance optimization.
+  - **Implement lighting adjustments:** You'll work on implementing adjustments to handle variations in lighting during video recording.
+  - **Optimize background handling:** Techniques to handle variations in the background are implemented.
+  - **Fine-tune hyperparameters:** Fine-tuning of the model's hyperparameters for better recognition accuracy.
+
+**Week 6: Evaluation**
+
+- Week 6 is dedicated to evaluating the system.
+  - **Prepare the testing dataset:** You'll prepare a separate dataset for testing the model.
+  - **Assess recognition accuracy:** The accuracy of the model in recognizing spoken words is assessed.
+  - **Real-time performance testing:** The model's real-time performance is evaluated under various conditions.
+
+**Week 7: Report Writing**
+
+- The final week is reserved for report writing.
+  - **Summarize research findings:** You'll summarize the key findings from your research.
+  - **Document methodology:** The methodology used in data collection, model development, and evaluation is documented.
+  - **Present results and analysis:** You'll present the results and analysis in a detailed research report.
+
 
 ## VII. Expected Outcomes:
 We anticipate that this research will result in a machine learning-based lip reading system capable of accurately transcribing spoken English words. This technology can significantly benefit the hearing impaired and improve speech recognition in various applications.
@@ -82,6 +169,13 @@ We anticipate that this research will result in a machine learning-based lip rea
 ## IX. Conclusion:
 
 ## X. References:
+* M. Abadi, A. Agarwal, P. Barham, E. Brevdo, Z. Chen, C. Citro, G. S. Corrado, A. Davis, J. Dean, M. Devin, et al. Tensorflow: Large-scale machine learning on heterogeneous distributed systems. arXiv preprint arXiv:1603.04467, 2016.
+* T. Afouras, J. S. Chung, and A. Zisserman. Deep lip reading: A comparison of models and an online application. In INTERSPEECH, 2018.
+* T. Afouras, J. S. Chung, and A. Zisserman. LRS3-TED: a large-scale dataset for visual speech recognition. arXiv preprint arXiv:1809.00496, 2018.
+* C. Feichtenhofer, A. Pinz, and A. Zisserman. Convolutional
+two-stream network fusion for video action recognition. In
+Proceedings of the IEEE Conference on Computer Vision
+and Pattern Recognition, 2016.
 
 ## XI. Description:
 
