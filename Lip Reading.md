@@ -34,6 +34,10 @@ To train and test our lip reading system, we will employ the following data coll
 3. Extracting Data from Online Sources:
 
     * We will also consider downloading YouTube videos that feature English speakers and extracting both voice and subtitle information. From these videos, we will extract images of the speakers' faces and lips. To facilitate this, we may utilize the "YouTube Faces with Facial Keypoints" dataset on [Kaggle link](https://www.kaggle.com/selfishgene/youtube-faces-with-facial-keypoints). Or we can write a script to download videos from youtube using the youtube API.
+4. Visual Speech DataSet:
+
+   * We will also consider using the LRS3-TED dataset, which is a large-scale dataset for visual speech recognition. It contains over 100,000 videos of lectures and talks, totaling 1,800 hours of video data. The dataset is available at [LRS3-TED](https://www.robots.ox.ac.uk/~vgg/data/lip_reading/lrs3.html)(not found).
+   * We will also consider using the LRS2 dataset, which is a large-scale dataset for visual speech recognition. It contains over 100,000 videos of lectures and talks, totaling 1,800 hours of video data. The dataset is available at [LRS2](https://www.robots.ox.ac.uk/~vgg/data/lip_reading/lrs2.html).
 
 ### B. Model Development:
 
