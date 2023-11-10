@@ -152,7 +152,7 @@ Report Writing
 
 **Week 6: Evaluation**
 
-- Week 6 is dedicated to evaluating the system.
+- Week 6 is dedicated to evaluating the system.[1]
   - **Prepare the testing dataset:** You'll prepare a separate dataset for testing the model.
   - **Assess recognition accuracy:** The accuracy of the model in recognizing spoken words is assessed.
   - **Real-time performance testing:** The model's real-time performance is evaluated under various conditions.
@@ -173,7 +173,7 @@ We anticipate that this research will result in a machine learning-based lip rea
 ## IX. Conclusion:
 
 ## X. References:
-* M. Abadi, A. Agarwal, P. Barham, E. Brevdo, Z. Chen, C. Citro, G. S. Corrado, A. Davis, J. Dean, M. Devin, et al. Tensorflow: Large-scale machine learning on heterogeneous distributed systems. arXiv preprint arXiv:1603.04467, 2016.
+[1] M. Abadi, A. Agarwal, P. Barham, E. Brevdo, Z. Chen, C. Citro, G. S. Corrado, A. Davis, J. Dean, M. Devin, et al. Tensorflow: Large-scale machine learning on heterogeneous distributed systems. arXiv preprint arXiv:1603.04467, 2016.
 * T. Afouras, J. S. Chung, and A. Zisserman. Deep lip reading: A comparison of models and an online application. In INTERSPEECH, 2018.
 * T. Afouras, J. S. Chung, and A. Zisserman. LRS3-TED: a large-scale dataset for visual speech recognition. arXiv preprint arXiv:1809.00496, 2018.
 * C. Feichtenhofer, A. Pinz, and A. Zisserman. Convolutional
