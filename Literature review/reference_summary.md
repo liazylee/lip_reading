@@ -1,9 +1,8 @@
 # Summary of reference
 
 
-## (S. Fenghour, D. Chen, K. Guo, B. Li and P. Xiao, 2021, "Deep Learning-Based Automated Lip-Reading: A Survey,")
+## 1. (S. Fenghour, D. Chen, K. Guo, B. Li and P. Xiao, 2021, "Deep Learning-Based Automated Lip-Reading: A Survey,")
 **a servey for lip reading** [Deep_Learning-Based_Automated_Lip-Reading_A_Survey.pdf](..%2Frefference%2FDeep_Learning-Based_Automated_Lip-Reading_A_Survey.pdf)
-
 
 ### The survey topic: 
 The paper is a survey on automated lip-reading approaches that use deep learning methods for feature extraction and classification. It also provides comparisons of different components and challenges of lip-reading systems.
@@ -30,7 +29,7 @@ A review of recent advances in applying deep neural networks, such as convolutio
 ### Challenges and future directions for lip reading:
 the challenges and potential advancements in automated lip-reading systems. It mentions the possibility of creating lexicon-free systems that could predict words not present in the training phase by using phonemes and visemes. However, several challenges remain, such as predicting unseen words, handling visual ambiguities, and generalizing to speakers not included in the training data. Additionally, the systems need to adapt to videos of varying spatial resolution and different frame rates. These factors contribute to the complexity of developing effective automated lip-reading systems.
 
-## (Y. Assael, B. Shillingford, S. Whiteson and N. de Freitas, 2016, "LipNet: End-to-End Sentence-level Lipreading,")
+## 2. (Y. Assael, B. Shillingford, S. Whiteson and N. de Freitas, 2016, "LipNet: End-to-End Sentence-level Lipreading,")
 
 ### background:
 The paper proposes a deep learning model that can map sequences of video frames of a speaker’s mouth to text sentences, without requiring any alignment or segmentation of the input. The model uses spatiotemporal convolutions, recurrent neural networks, and connectionist temporal classification loss, trained end-to-end.
@@ -43,7 +42,7 @@ The paper reports that the model achieves 95.2% accuracy in sentence-level word 
 
 ### conclusion:
 The paper claims that the model is the first to apply deep learning to end-to-end learning of a model that maps sequences of image frames of a speaker’s mouth to entire sentences. The paper also suggests that the model can be improved with more data and applied to larger datasets and audio-visual speech recognition tasks.
-## (J, S. Chung,  A. Senior, O, Vinyals,A, Zisserman, 2017, "Lip Reading Sentences in the Wild")
+## 3. (J, S. Chung,  A. Senior, O, Vinyals,A, Zisserman, 2017, "Lip Reading Sentences in the Wild")
 
 ### background and abstract:
 The paper provide a novel network model for audio-visual speech recognition that can transcribe speech into characters from visual input only, audio input only, or both. The model uses a dual attention mechanism to align the input sequences and the output characters. The model is called Watch, Listen, Attend and Spell (WLAS).
@@ -64,7 +63,7 @@ The paper acknowledges that the model is limited by the quality and quantity of 
 Potential applications and impacts: The paper discusses several possible applications of lip reading, such as dictating instructions or messages in a noisy environment, transcribing and re-dubbing archival silent films, resolving multi-talker simultaneous speech, and improving the performance of automated speech recognition in general3. The paper also speculates that lip reading research could benefit the hard of hearing by teaching them how to lip read better.
 
 
-## (A,Gutierrez,Z A,Robert, 2017,"Lip Reading Word Classification")
+## 4. (A,Gutierrez,Z A,Robert, 2017,"Lip Reading Word Classification")
 ### Dataset and Features: 
 The authors use the MIRACL-VC1 dataset, which contains color and depth images of 15 speakers uttering 10 words and 10 phrases. They preprocess the data by cropping the faces and augmenting the data with flipping and jittering. They focus on the word classification task with 10 classes.
 
@@ -74,7 +73,7 @@ The authors describe four models: a Baseline CNN + LSTM network, a Deep Layered 
 ### Results and Discussion: 
 The authors report the accuracy of their models on both seen and unseen subjects. They find that the Fine-Tuned VGG-16 + LSTM network achieves the best performance, with 79% validation accuracy and 59% test accuracy on seen subjects5. They also analyze the confusion matrices of their models and identify some sources of errors, such as short words and speaker variations. They suggest some ways to improve their models, such as regularization, cross-validation, and data augmentation.
 
-## (T,Afouras,J,S Chung,A,Zisserman, 2018,"Deep Lip Reading: a comparison of models and an online application")
+## 5. (T,Afouras,J,S Chung,A,Zisserman, 2018,"Deep Lip Reading: a comparison of models and an online application")
 
 ### Background and Abstract:
 The paper presents a comparison of different deep learning models for lip reading, including LipNet, Lip Reading Sentences (LRS), and Lip Reading Words (LRW). The paper also describes an online lip reading application that uses the best performing model.
@@ -93,3 +92,25 @@ The paper concludes that the LRS model is better suited for sentence-level lip r
 
 ### Potential applications and impacts:
 The paper discusses several possible applications of lip reading, such as dictating instructions or messages in a noisy environment, transcribing and re-dubbing archival silent films, resolving multi-talker simultaneous speech, and improving the performance of automated speech recognition in general3. The paper also speculates that lip reading research could benefit the hard of hearing by teaching them how to lip read better.
+
+
+## (T,Afouras,J,S Chung,A,Senior,O,Vinyals,A,Zisserman, 2019 ,"Deep audio-visual speech recognition")
+
+### Background and Abstract:
+ The goal of this work is to recognise phrases and sentences being spoken by a talking face, with or without the audio. The authors compare two models for lip reading, one using a CTC loss, and the other using a sequence-to-sequence loss. Both models are based on the transformer self-attention architecture. The authors also investigate how lip reading can complement audio speech recognition, especially when the audio signal is noisy.
+
+### Dataset and Features:
+The authors introduce and publicly release a new dataset for audio-visual speech recognition, LRS2-BBC, consisting of thousands of natural sentences from British television. The authors also describe the model architectures for audio-visual speech recognition, which are based on the recently proposed Transformer model. The authors explore two variants, one using an encoder-decoder attention structure for training in a seq2seq manner and the other using a stack of self-attention blocks for training with CTC loss.
+
+### Methods:
+The authors use a four-stage training strategy: 
+* i, pre-training the visual front-end on word excerpts from the MV-LRS dataset ; 
+* ii, generating visual features for all the training data using the vision module; 
+* iii, training the sequence processing module on the frozen visual features; iv) fine-tuning the whole network end-to-end. The authors also use a curriculum learning strategy where they start training on single word examples and then gradually increase the sequence length.
+
+### Results and Discussion:
+Their best visual-only model significantly outperforms the previous state-of-the-art on the LRS2-BBC lip reading dataset and sets a strong baseline for the recently released LRS3-TED. The paper also demonstrates that visual information can enhance speech recognition performance, even when the audio signal is clean. Particularly in the presence of noise in the audio, combining the two modalities leads to a significant improvement.
+
+
+## (T,Afouras,A,Owens,J,S Chung,A,Zisserman, 2020 ,"Self-Supervised Learning of Audio-Visual Objects from Video")
+
