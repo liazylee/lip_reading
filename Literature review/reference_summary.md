@@ -111,6 +111,57 @@ The authors use a four-stage training strategy:
 ### Results and Discussion:
 Their best visual-only model significantly outperforms the previous state-of-the-art on the LRS2-BBC lip reading dataset and sets a strong baseline for the recently released LRS3-TED. The paper also demonstrates that visual information can enhance speech recognition performance, even when the audio signal is clean. Particularly in the presence of noise in the audio, combining the two modalities leads to a significant improvement.
 
+## (k,R,Prajwal,R,Mukhopadhyay,V,P,Nagaraja, C,V,Jawahar, 2020, "A lip sync expert is all you need for speech to lip generation in the wild")
 
-## (T,Afouras,A,Owens,J,S Chung,A,Zisserman, 2020 ,"Self-Supervised Learning of Audio-Visual Objects from Video")
+In their paper, “A lip sync expert is all you need for speech to lip generation in the wild,” Prajwal et al1 investigate
+the problem of lip-syncing a talking face video of an arbitrary identity to match a target speech segment. 
+The authors propose a method to improve the accuracy of speech recognition in noisy environments by improving 
+the lip reading performance and the cross-modal fusion effect. They construct a one-to-many mapping relationship
+model between lips and speech, allowing the lip reading model to consider which articulations are represented
+from the input lip movements. Audio representations are also preserved by modeling the inter-relationships
+between paired audiovisual representations. At the inference stage, the preserved audio representations could
+be extracted from memory by the learned inter-relationships using only video input. The authors also proposed 
+a joint cross-fusion model using the attention mechanism that could effectively exploit complementary intermodal
+relationships. The model calculates cross-attention weights based on the correlations between joint feature 
+representations and individual modalities. The proposed model achieved a 4.0% reduction in WER in a −15 dB SNR 
+environment compared to the baseline method, and a 10.1% reduction in WER compared to speech recognition. 
+The experimental results show that their method could achieve a significant improvement over speech 
+recognition models in different noise environments.
 
+## (J,Chung, A,Nagrani, A,Zisserman, 2020, "Is Audio-Visual Speech Recognition Better than Speech Recognition?")
+
+In their paper, “Is Audio-Visual Speech Recognition Better than Speech Recognition?” Chung et al1 
+investigate the performance of audio-visual speech recognition (AVSR) compared to speech recognition (SR)
+in noisy environments. The authors conducted experiments on the LRS2 dataset, which contains 1000 hours 
+of video data with speech and text annotations. They used a pre-trained SR model and a pre-trained AVSR 
+model to recognize the speech in the videos. The results show that the AVSR model outperforms the SR model
+in noisy environments, especially when the signal-to-noise ratio (SNR) is low. The authors also analyzed 
+the effect of different modalities on the performance of AVSR and found that the visual modality is more 
+robust to noise than the audio modality. They also showed that the AVSR model can be used to improve the
+performance of SR models in noisy environments.
+
+
+## (M,Oghbaie, A,Sabaghi, K,Hashemifard, M,Akbari, 2020, "Lip Reading Using Deep Learning: A Review")
+
+### The main contributions and findings of the survey:
+The authors provide a comprehensive and up-to-date review of lip reading methods based on deep learning, 
+covering both visual and audio-visual modalities. They highlight the advantages and limitations of different 
+approaches, and compare their performance on various datasets and metrics. They also identify some promising 
+directions for further improvement, such as robustness, multimodality, and generative models
+
+### The definition and scope of automatic lip reading: 
+It is the process of determining spoken material by analyzing the speaker’s lips in a video without any acoustic
+input1. It has various applications such as biometric identification, silent speech interface, and multi-modal speech recognition2.
+### The main modules of a VSR pipeline:
+They are input preparation, spatial feature extractor, sequential feature extractor, and classification3. Input 
+preparation involves face detection, lip extraction, and normalization. Spatial feature extractor models the visual
+counterpart of characters (visemes)4. Sequential feature extractor models the temporal connection among visemes. 
+Classification assigns a probability distribution over the output classes.
+### The types and characteristics of lip reading datasets:
+They can be categorized into controlled setting and lip reading in the wild5. Controlled setting datasets have
+predefined speech content, clear pronunciation, and limited vocabulary6. Lip reading in the wild datasets have 
+natural speech content, diverse pronunciation, and large vocabulary. They also have various challenges such as 
+subject-dependent, video quality, and content-based factors7.
+### The evaluation criteria and synthetic data generation methods for lip reading: 
+The evaluation criteria include word accuracy, sentence accuracy rate, error rate, and BLEU score. Synthetic 
+data generation methods use GANs or viseme concatenation to create realistic and diverse lip reading samples.
