@@ -12,4 +12,5 @@ media
 .idea
 .DS_Store
 /lrs2
-
+*.zip
+.src/lipNet/data/
