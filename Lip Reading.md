@@ -23,25 +23,27 @@ To train and test our lip reading system, we will employ the following data coll
 
 1. Recording Video Samples:
 
-    * We will capture video samples of English speakers enunciating a wide range of words and phrases. These recordings will serve as the primary dataset for our research.
-    * Each video will be annotated to provide ground truth transcriptions, aligning the spoken words with the corresponding lip movements.
+   * We will capture video samples of English speakers enunciating a wide range of words and phrases. These recordings will serve as the primary dataset for our research.
+   * Each video will be annotated to provide ground truth transcriptions, aligning the spoken words with the corresponding lip movements.
 
-2. Utilizing Existing Datasets:
+~~2. Utilizing Existing Datasets:~~
 
-   * To augment our dataset, we will consider leveraging publicly available resources. Specifically, we will explore the "Lip Reading Image Dataset" on [Kaggle link](https://www.kaggle.com/datasets/apoorvwatsky/miraclvc1/data), which contains relevant images for lip reading research.
+   ~~* To augment our dataset, we will consider leveraging publicly available resources. Specifically, we will explore the "Lip Reading Image Dataset" on [Kaggle link](https://www.kaggle.com/datasets/apoorvwatsky/miraclvc1/data), which contains relevant images for lip reading research.~~
    
 
-3. Extracting Data from Online Sources:
+~~3. Extracting Data from Online Sources:~~
 
-    * We will also consider downloading YouTube videos that feature English speakers and extracting both voice and subtitle information. From these videos, we will extract images of the speakers' faces and lips. To facilitate this, we may utilize the "YouTube Faces with Facial Keypoints" dataset on [Kaggle link](https://www.kaggle.com/selfishgene/youtube-faces-with-facial-keypoints). Or we can write a script to download videos from youtube using the youtube API.
-4. Visual Speech DataSet:
+~~4. Visual Speech DataSet:~~
 
-   * We will also consider using the LRS3-TED dataset, which is a large-scale dataset for visual speech recognition. It contains over 100,000 videos of lectures and talks, totaling 1,800 hours of video data. The dataset is available at [LRS3-TED](https://www.robots.ox.ac.uk/~vgg/data/lip_reading/lrs3.html)(not found).
+   ~~* We will also consider using the LRS3-TED dataset, which is a large-scale dataset for visual speech recognition. It contains over 100,000 videos of lectures and talks, totaling 1,800 hours of video data. The dataset is available at [LRS3-TED](https://www.robots.ox.ac.uk/~vgg/data/lip_reading/lrs3.html)(not found).~~
+2. Utilizing Existing Datasets:
    * We will also consider using the LRS2 dataset, which is a large-scale dataset for visual speech recognition. It contains over 100,000 videos of lectures and talks, totaling 1,800 hours of video data. The dataset is available at [LRS2](https://www.robots.ox.ac.uk/~vgg/data/lip_reading/lrs2.html).
-
+   * use the grid corpus dataset, which contains 34 speakers and 1000 sentences. The dataset is available at [grid corpus](https://www.robots.ox.ac.uk/~vgg/data/lip_reading/lrs2.html).
+   
 ### B. Model Development:
 
 Create a deep learning model, potentially based on convolutional neural networks (CNNs) or recurrent neural networks (RNNs).
+Because the dataset is video,we may use LSTM, TCNs ,transformers,or GAANs.
 Train the model using the annotated dataset to recognize and transcribe spoken words.
 
 1. Data Preprocessing:
@@ -58,6 +60,7 @@ Train the model using the annotated dataset to recognize and transcribe spoken w
     * We will explore various deep learning models, including convolutional neural networks (CNNs) ; recurrent neural networks (RNNs).such as Long Short-Term Memory(LSTM) networks; Hybrid models that combine CNNs and RNNs; End-to-End Models: models that directly map the input to the output without any intermediate steps; 3D CNNs: models that can capture temporal information from video data.
     * We will select the model that yields the best performance on the testing set.
 4. Model Training:
+    * I used 3D CNNS conbined with LSTM using the grid corpus dataset. 
 5. Model Evaluation:
 6. Model Optimization:
 7. Combine Audio and Visual Cues:
@@ -77,6 +80,8 @@ Implement techniques to handle variations in lighting and background.
 Assess the system's accuracy and real-time performance on a testing dataset.
 Conduct real-world testing in different environments and with diverse speakers.
 ## VI. Timeline:
+
+### semester 1:
 Weeks:                  1  |  2  |  3  |  4  |  5  |  6  |  7
 -------------------------------------------------------------
 
@@ -163,6 +168,70 @@ Report Writing
   - **Summarize research findings:** You'll summarize the key findings from your research.
   - **Document methodology:** The methodology used in data collection, model development, and evaluation is documented.
   - **Present results and analysis:** You'll present the results and analysis in a detailed research report.
+### semester 2:
+Weeks:                  1   |  2   |  3   |  4  |  5  |  6  |  7 |  8  |
+---------------------------------------------------------------------
+paper reading           [===========================================]
+
+model developmemt       [=================================]
+
+model training                             [======================]
+
+model evaluation                                      [===========]
+
+report writing                                               [========]
+
+---------------------------------------------------------------------
+
+#### Review of semester 1:
+1. go through lots of papers about lip reading and speech recognition.
+
+2. pick pu two datasets for training and testing.
+
+3. set up required environment for training a model.
+
+4. get a hand on experience on grid corpus dataset, by using 3D CNNs conbined with LSTM. the framework is tensorflow.
+
+5. come across two main problems:
+
+    1.1 equipment: My own computer is not compatible for training another dataset which means I can't conduct my own experiments 
+by using different Model architecture design.
+    
+    1.2 lrw2 dataset is too large to train. It may take several days or longer time to train a model.
+
+
+#### Plan for semester 2:
+1. continue reading papers about lip reading and speech recognition. find out the most suitable model for lip reading.
+like vit,GAANs, TCNs, transformers, etc.
+2. if I still can't train a model by using lrw2 dataset, I will try to find a pre-trained model and fine-tune it:
+if so, I will change my project to "Lip Reading in English Using Machine Learning and Computer Vision Based on Pre-trained Model".
+3. find a suitable methodolgy for fine-tuning a pre-trained model like flash attention,Adapter,Adversarial Training, etc.
+4. if everything goes well, I will use fine-tuning method to optimize my model.
+5. evaluate my model's performance.
+6. desin a web application for lip reading.
+7. write a report.
+
+
+**Week 1-8: Paper Reading**
+    -[] **continue reading papers about lip reading and speech recognition.**
+    - **read papers about 3D CNNs and LSTM.**
+    - **read papers about transformers and GAANs.**
+    - **read papers about TCNs.**
+     - **read papers about vit.**
+    - **read papers about pre-trained model.**
+    - **read papers about fine-tuning a pre-trained model.**
+
+**Week 3-6: Model Development**
+   - **Model architecture design:** design the architecture of the deep learning model through reading papers.
+   - **Model training:** The training of the model using the preprocessed data starts.
+   - **Model fine-tuning:** Fine-tuning of the model begins to enhance its performance.
+   - **Model evaluation:** evaluate the model's performance.
+
+**Week 7-8: Report Writing**
+    - **Summarize research findings:**  summarize the key findings from your research.
+    - **Document methodology:** The methodology used in data collection, model development, and evaluation is documented.
+    - **Present results and analysis:** present the results and analysis in a detailed research report.
+
 
 
 ## VII. Expected Outcomes:
@@ -184,6 +253,7 @@ and Pattern Recognition, 2016.
 ## XI. Description:
 
 The purpose of this research project is to harness the power of machine learning and computer vision technologies to advance the field of lip reading. Our primary objective is to develop and deploy robust, real-time systems capable of accurately transcribing spoken language by interpreting the visual cues provided by the movement of the lips. Lip reading has the potential to bridge communication gaps, making spoken language accessible to individuals with hearing impairments, enhancing security through speech recognition in challenging environments, and contributing to a wide range of applications.
+
 
 
 

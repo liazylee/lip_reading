@@ -1,4 +1,6 @@
-import os 
+import os
+
+from keras.src.layers import GlobalAveragePooling3D
 from tensorflow.keras.models import Sequential 
 from tensorflow.keras.layers import Conv3D, LSTM, Dense, Dropout, Bidirectional, MaxPool3D, Activation, Reshape, SpatialDropout3D, BatchNormalization, TimeDistributed, Flatten
 
@@ -21,7 +23,7 @@ def load_model() -> Sequential:
     model.add(Conv3D(75, 3, padding='same'))
     model.add(Activation('relu'))
     model.add(MaxPool3D((1,2,2)))
-
+    # Add a dropout layer with a dropout rate of 0.5 after the convolutional layers.
     model.add(TimeDistributed(Flatten()))
 
     model.add(Bidirectional(LSTM(128, kernel_initializer='Orthogonal', return_sequences=True)))

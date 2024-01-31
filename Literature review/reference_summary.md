@@ -165,3 +165,21 @@ subject-dependent, video quality, and content-based factors7.
 ### The evaluation criteria and synthetic data generation methods for lip reading: 
 The evaluation criteria include word accuracy, sentence accuracy rate, error rate, and BLEU score. Synthetic 
 data generation methods use GANs or viseme concatenation to create realistic and diverse lip reading samples.
+
+## Overview of Lip Reading Methods: Issues, Current Developments, and Future Prospects
+![img_2.png](../images/methods_table.png)
+in this paper, I tipically foucs on the methods of lip reading, and the history of how the methods are developed over the development of deep learning by time.
+as shows in this figure, the methods of lip reading can be divided into two categories:
+* 1. feature extraction:
+the authors of this paper call it as front-end, which involves the process of extracting features from the input video, 
+and the features are used for the next step of classification.  to my best knowledge, the features are extracted by CNNs,
+specifically, 2D CNNs, 3D CNNs, or 2D+3D CNNs. they are used to extract spatial and temporal features from lip images.
+But the common problem of these methods is that they are facing graident disappering.
+* 2. classification:
+The authors of this paper call it as back-end, which involves the process of classifying the features extracted from the front-end.
+The features are classified by RNNs, GRU ,attention mechanisms, connectionist temporal classification (CTC), and transformers.
+To my best knowledge, the most common for those methods is to using time. Because the lip reading is a time series problem.
+To get a better training,how to keep the gradient smooth is the most important concern.
+## Attenion is all you need
+
+## deep residual learning for image recognition

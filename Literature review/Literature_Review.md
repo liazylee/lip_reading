@@ -72,9 +72,9 @@ be divided into two main steps: feature extraction and classification.
 The feature extraction step is responsible for extracting the most relevant information from the video frames. 
 The classification step is responsible for predicting the corresponding speech from the extracted features. 
 The following figures shows the general lip reading pipeline. 
-![img.png](img.png)
+![img.png](../images/process_of_lip_reading.png)
 
-![img_1.png](img_1.png)
+![img_1.png](../images/flows_process.png)
 
 All lip reading  always come  with data collection first,which is the very first step in "Input Video" in the above figure.
 And then, we need to do some preprocessing to extract the features like face detection ,face alignment, and mouth extraction.
