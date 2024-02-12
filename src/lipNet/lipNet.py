@@ -28,7 +28,10 @@ from matplotlib import pyplot as plt
 import imageio
 
 
-tf.config.list_physical_devices('GPU')
-tf.config.experimental.set_memory_growth(tf.config.experimental.list_physical_devices('GPU')[0], True)
+gpu_devices = tf.config.experimental.list_physical_devices('GPU')
+for device in gpu_devices:
+    tf.config.experimental.set_memory_growth(device, True)
+GPU_list=tf.config.list_physical_devices('GPU')
+
 
 

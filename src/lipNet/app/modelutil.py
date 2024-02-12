@@ -1,11 +1,20 @@
 import os
 
+from keras.src.applications import ResNet50
 from keras.src.layers import GlobalAveragePooling3D
 from tensorflow.keras.models import Sequential 
 from tensorflow.keras.layers import Conv3D, LSTM, Dense, Dropout, Bidirectional, MaxPool3D, Activation, Reshape, SpatialDropout3D, BatchNormalization, TimeDistributed, Flatten
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-def load_model() -> Sequential: 
+def load_model() -> Sequential:
+    # base_model = ResNet50(weights=None, include_top=False, input_shape=(46, 140, 3))
+    #
+    # # If you wish to Freeze layers
+    # for layer in base_model.layers:
+    #     layer.trainable = True
+    #
+    # model = Sequential()
+    # model.add(base_model)
     model = Sequential()
     # Add a 3D convolutional layer with 128 filters, a kernel size of (3, 3, 3), and input shape of (75, 46, 140, 1)
     # The 'padding' parameter is set to 'same' to ensure that the spatial dimensions of the output remain the same as the input.
@@ -32,8 +41,8 @@ def load_model() -> Sequential:
     model.add(Bidirectional(LSTM(128, kernel_initializer='Orthogonal', return_sequences=True)))
     model.add(Dropout(.5))
 
-    model.add(Dense(41, kernel_initializer='he_normal', activation='softmax'))
+    model.add(Dense(29, kernel_initializer='he_normal', activation='softmax'))
 
-    model.load_weights(os.path.join('..','models','checkpoint'))
+    model.load_weights(os.path.join('..','models_4','checkpoint'))
 
     return model

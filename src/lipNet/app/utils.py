@@ -3,7 +3,8 @@ from typing import List
 import cv2
 import os
 
-vocab = [x for x in "abcdefghijklmnopqrstuvwxyz'?!123456789 "]
+# vocab = [x for x in "abcdefghijklmnopqrstuvwxyz'?!123456789 "]
+vocab= [x for x in "abcdefghijklmnopqrstuvwxyz "]
 char_to_num = tf.keras.layers.StringLookup(vocabulary=vocab, oov_token="")
 # Mapping integers back to original characters
 num_to_char = tf.keras.layers.StringLookup(
@@ -22,8 +23,8 @@ def load_video(path:str) -> List[float]:
     cap.release()
     
     mean = tf.math.reduce_mean(frames)
-    std = tf.math.reduce_std(tf.cast(frames, tf.float32))
-    return tf.cast((frames - mean), tf.float32) / std
+    std = tf.math.reduce_std(tf.cast(frames, tf.float16))
+    return tf.cast((frames - mean), tf.float16) / std
     
 def load_alignments(path:str) -> List[str]: 
     #print(path)
@@ -36,6 +37,15 @@ def load_alignments(path:str) -> List[str]:
             tokens = [*tokens,' ',line[2]]
     return char_to_num(tf.reshape(tf.strings.unicode_split(tokens, input_encoding='UTF-8'), (-1)))[1:]
 
+def load_alignments_text(path:str) -> List[str]:
+    with open(path, 'r') as f:
+        lines = f.readlines()
+    tokens = []
+    for line in lines:
+        line = line.split()
+        if line[2] != 'sil':
+            tokens = [*tokens,' ',line[2]]
+    return tokens
 def load_data(path: str): 
     path = bytes.decode(path.numpy())
     file_name = path.split('/')[-1].split('.')[0]
