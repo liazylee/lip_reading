@@ -181,5 +181,78 @@ The features are classified by RNNs, GRU ,attention mechanisms, connectionist te
 To my best knowledge, the most common for those methods is to using time. Because the lip reading is a time series problem.
 To get a better training,how to keep the gradient smooth is the most important concern.
 ## Attenion is all you need
+the authors propose a new simple network architecture, the Transformer,
+based solely on attention mechanisms, dispensing with recurrence and convolutions
+entirely. Experiments on two machine translation tasks show these models to
+be superior in quality while being more parallelizable and requiring significantly
+less time to train.  
+
+The core innovation of the Transformer architecture lies in its heavy reliance on self attention mechanisms, which allow
+each word or token in a sequence to attend to all other words or tokens in the same sequence. This enables the model to
+capture global depenencies within the input sequence, overcoming the limitations of the sequential processing in RNNs.  
+
+To facilitate the intergration of positional information into the self-attention mechanism, the authors introduced 
+positional encodings. These encodings are added to the input embeddings and provide the model with information about the
+relative positions of the tokens within the sequence.  
+
+The transformer architecture consists of an encoder and a decoder, each composed of multiple layers. Within each layer.
+the model applies self-attention mechanisms in parallel across all input tokens. Additionally, each layer contains 
+feedforward neural networks, which process the output of the self-attention mechanisms.  
+
+
+
+
+![transformer_architecture.png](../images/transformer_architecture.png)
+
+
 
 ## deep residual learning for image recognition
+the resNet has become the most infulential deep learning architecture, particularly
+in the field of computer vision. Its ability to train very deep networks effectively
+has led to state-of-the-art performance on various image recognition tasks.
+As shown in the below figure, Besides the deeper learning architecture, the resNet add a extra 
+connection between the input and trained output, which is called residual connection. By using 
+this connection, the gradient can be easily backpropagated to the input, and the gradient disappering
+problem can be solved.  
+ To enable residual learning, ResNet introduces skip connections or shortcuts that directly 
+connect earlier layers to later layers, bypassing some layers. These skip connections allow 
+the network to learn residual mappings effectively. If a particular layer does not 
+contribute significantly to improving accuracy, the skip connection allows the network to 
+skip it, mitigating the vanishing gradient problem.  
+Identity Shortcut Connections: The most common form of skip connections in ResNet is the 
+identity shortcut connection, where the input to a layer is added directly to the 
+output of a later layer. This allows the network to learn the residual instead of 
+the entire transformation, making it easier to optimize.  
+Deep Architectures: With the introduction of residual connections, ResNet can be 
+trained effectively even with very deep architectures. This enables the construction 
+of extremely deep neural networks with hundreds or even thousands of layers while 
+maintaining good performance.
+
+
+
+
+
+
+![residual_architecture.png](../images/residual_architecture.png)
+
+## lip-to-speech synthesis in the wild with multi-task learning
+
+the authors present a multi-task learning approach to lip-to-speech synthesis in the wild. The model is trained to 
+predict both the audio and the text from the visual input, and the two tasks are learned jointly. The authors use a 
+large-scale dataset of talking face videos from the internet, and they evaluate the model on a variety of metrics, 
+such as word error rate, sentence error rate, and speech quality. The authors find that the multi-task learning 
+approach outperforms the single-task learning approach, and they also find that the model can generalize to 
+unseen speakers and languages. The authors also show that the model can be used to generate high-quality 
+speech from silent talking face videos, and they demonstrate the potential applications of the model, 
+such as speech recognition, speech synthesis, and speaker verification.
+
+## 3D Convolutional Neural Networks for Cross 
+The authors propose the use pf a couple 3D Convolutional Neural Network(3D CNN) architecture that can map
+both modalities into a representation space to evaluate the correspondence of audio-visual streams using the learned multimodal 
+features. The proposed architecture will incorporate both spatial and temporal information jointly to effectively
+find the correlation between temporal information for different modalities. By using a relatively small
+network architecture and much smaller dataset for training, our proposed method surpasses the performance of 
+the existing similar methods for audio-visual matching which use 3D CNNs for feature representation.
+The proposed method achieves relative improvements over 20% on the Equal Error Rate (EER) and over 7%
+on the Average Precision (AP) compared to the existing methods. 
+

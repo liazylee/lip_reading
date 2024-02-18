@@ -22,8 +22,6 @@ def generate_mounth_video_dict(path:str) -> dict[str:List[float]]:
                     frame = gray_frame[y:y + h, x:x + w]
                     frame = tf.image.resize(frame, [46, 140])
                 frames.append(frame)
-
-                frames.append(frame)
             cap.release()
             mean = tf.math.reduce_mean(frames)
             std = tf.math.reduce_std(tf.cast(frames, tf.float16))
