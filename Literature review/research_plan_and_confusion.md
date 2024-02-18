@@ -26,5 +26,5 @@ accuracy (need to be approved)
   -[ ] Does the training model accept a flexible input data?
   -[ ] If not, how to make the input data flexible to fit the model?
 - [x] When training the model what are the logs I need to pay attention to? I only have the logs, val_loss and accuracy
-try TensorFlow Visualization Toolkit (TensorBoard) and tensorboardx to visualize the training logs
-
+try TensorFlow Visualization Toolkit [TensorBoard](https://www.tensorflow.org/tensorboard/get_started) and 
+[TensorBoardX](https://github.com/lanpa/tensorboardX) to visualize the training logs
