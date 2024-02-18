@@ -195,7 +195,7 @@ report writing                                               [========]
 5. come across two main problems:
 
     1.1 equipment: My own computer is not compatible for training another dataset which means I can't conduct my own experiments 
-by using different Model architecture design.
+by using different Model architecture design.(sloved by buying a new computer.)
     
     1.2 lrw2 dataset is too large to train. It may take several days or longer time to train a model.
 
