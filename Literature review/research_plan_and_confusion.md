@@ -28,3 +28,37 @@ accuracy (need to be approved)
 - [x] When training the model what are the logs I need to pay attention to? I only have the logs, val_loss and accuracy
 try TensorFlow Visualization Toolkit [TensorBoard](https://www.tensorflow.org/tensorboard/get_started) and 
 [TensorBoardX](https://github.com/lanpa/tensorboardX) to visualize the training logs
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Tip of the project
+## training process
+1. when you are designing the training process, you will generate a lot of datas like preprocess data which you can use it 
+next time, and you don't want to generate it every train time. So you can save the preprocess data like 'pickle' in python
+```python
+import pickle
+data=[[1,2,3,4,5],[6,7,8,9,10]]
+with open('data.pickle', 'wb') as f:
+    pickle.dump(data, f)
+```
+Example:
+when you aught to tranform the mouth area to a series of frames, you can save the frames to a pickle file, and next time
+you can load the pickle file directly, which can save a lot of time.
+```python
+import pickle
+with open('data.pickle', 'rb') as f:
+    data = pickle.load(f)
+```
+
+
