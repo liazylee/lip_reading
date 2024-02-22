@@ -30,7 +30,7 @@ st.title('LipNet Full Stack App')
 # Generating a list of options or videos
 # change the path to absolute path
 script_dir = os.path.dirname(os.path.abspath(__file__))
-options = os.listdir(os.path.join('..','data','s10'))
+options = os.listdir(os.path.join('..','data','s1'))
 
 selected_video = st.selectbox('Choose video', options)
 
@@ -45,9 +45,9 @@ if process_button:
     # Rendering the video 
     with col1:
         st.info('The video below displays the converted video in mp4 format')
-        file_path = os.path.join('..','data','s10', selected_video)
+        file_path = os.path.join('..','data','s1', selected_video)
         selected_video_name = selected_video.split('.')[0]
-        align = os.path.join('..', 'data', 'alignments', 's13', f'{selected_video_name}.align')
+        align = os.path.join('..', 'data', 'alignments', 's1', f'{selected_video_name}.align')
         os.system(f'ffmpeg -i {file_path} -vcodec libx264 test_video.mp4 -y') # convert to mp4
         st.info('loading the video...')
         time.sleep(1)
@@ -65,7 +65,7 @@ if process_button:
         st.info('This is all the machine learning model sees when making a prediction')
         # wait for the video to be loaded
 
-        video = load_video(file_path)
+        video = load_video(file_path)  #  load video features
         # imageio.mimsave('animation.gif', video, fps=10)
         # st.image('animation.gif', width=400)
 
