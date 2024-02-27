@@ -57,3 +57,25 @@ def load_data(path: str):
     alignments = load_alignments(alignment_path)
     
     return frames, alignments
+
+
+
+
+
+
+def cosine_similarity(word1:str=None,words2:str=None)->float:
+    if word1 is None or words2 is None:
+
+        return 0
+    v1,v2=[ord(x) for x in ''.join(word1.split())],[ord(x) for x in ''.join(words2.split())]
+    sumxx, sumxy, sumyy = 0, 0, 0
+    for i in range(len(v1)):
+        x = v1[i]; y = v2[i]
+        sumxx += x*x
+        sumyy += y*y
+        sumxy += x*y
+    return sumxy / ((sumxx**.5) * (sumyy**.5))
+
+
+
+

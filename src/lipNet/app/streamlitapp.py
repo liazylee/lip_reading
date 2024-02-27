@@ -1,7 +1,6 @@
 # Import all of the dependencies
 import tempfile
 import time
-
 import cv2
 import streamlit as st
 import os
@@ -10,7 +9,7 @@ import numpy as np
 import tensorflow as tf
 # from tensorflow_datasets.core.features.image_feature import cv2
 
-from utils import load_data, num_to_char, load_alignments, load_alignments_text, load_video
+from utils import load_data, num_to_char, load_alignments, load_alignments_text, load_video, cosine_similarity
 from modelutil import load_model
 
 
@@ -68,7 +67,6 @@ if process_button:
         video = load_video(file_path)  #  load video features
         # imageio.mimsave('animation.gif', video, fps=10)
         # st.image('animation.gif', width=400)
-
         st.info('This is the output of the machine learning model as tokens')
         model = load_model()
         yhat = model.predict(tf.expand_dims(video, axis=0))
@@ -79,7 +77,13 @@ if process_button:
         st.info('Decode the raw tokens into words')
         converted_prediction = tf.strings.reduce_join(num_to_char(decoder)).numpy().decode('utf-8')
         st.info(converted_prediction)
-        
+        # accuracy use 余弦值相似度计算
+        accuracy = cosine_similarity(converted_prediction, align)
+        st.info(f'accuracy : {round(accuracy,5)*100} %')
+
+
+
+
 if record_button:
     with col3:
         cap=cv2.VideoCapture(0)
@@ -118,5 +122,7 @@ if record_button:
         st.info('Decode the raw tokens into words')
         converted_prediction = tf.strings.reduce_join(num_to_char(decoder)).numpy().decode('utf-8')
         st.text(converted_prediction)
+
+
 
 

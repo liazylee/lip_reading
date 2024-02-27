@@ -16,18 +16,21 @@ accuracy (need to be approved)
   - [ ] padding the mouth area with time dimension to fit the model
 
 ## problems when implementing the model I need to solve
-- [ ] what is the best practices to pad the mouth area with time dimension: 
-  - [ ] I trained the model by specifying time length of the mouth area(75 frames), but the real time
+- [x] what is the best practices to pad the mouth area with time dimension: (pading with zero)
+  - [x] I trained the model by specifying time length of the mouth area(75 frames), but the real time
     length of the mouth area is not fixed. So Do I need to pad the mouth area with the same frame for several times?
-    or if the mouth area is too short, do I need to pad the mouth area with the same frame using zero padding?
-  - [ ] Is that affect the performance of the model because the real speech is not cut off at the time length I pad 
-  leading the speech is not complete?
-- [ ] How to make the train input data flexible to fit the model:
-  -[ ] Does the training model accept a flexible input data?
-  -[ ] If not, how to make the input data flexible to fit the model?
+    or if the mouth area is too short, do I need to pad the mouth area with the same frame using zero padding?(cut off 
+  the video by use opencv or ffmpeg)
+  - [x] Is that affect the performance of the model because the real speech is not cut off at the time length I pad 
+  leading the speech is not complete?(yes)
+- [x] How to make the train input data flexible to fit the model: (not yet)
+  -[x] Does the training model accept a flexible input data?
+  -[x] If not, how to make the input data flexible to fit the model?
 - [x] When training the model what are the logs I need to pay attention to? I only have the logs, val_loss and accuracy
 try TensorFlow Visualization Toolkit [TensorBoard](https://www.tensorflow.org/tensorboard/get_started) and 
-[TensorBoardX](https://github.com/lanpa/tensorboardX) to visualize the training logs
+[TensorBoardX](https://github.com/lanpa/tensorboardX) to visualize the training logs   
+
+# week
 
 
 
@@ -60,5 +63,9 @@ import pickle
 with open('data.pickle', 'rb') as f:
     data = pickle.load(f)
 ```
+
+2. when you are training the model, you may want to slightly change the architecture of the model,
+making all the changes in a file, like config.py or config.json,and import the file in the main file, 
+so you can easily change the architecture of the model without changing the main file.
 
 
