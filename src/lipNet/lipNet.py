@@ -56,7 +56,7 @@ while cap.isOpened():
         for detection in results.detections:
             bboxC = detection.location_data.relative_bounding_box
             ih, iw, _ = frame.shape
-            print(f'Image Height: {ih}, Image Width: {iw}')
+            print(f'Image Height: {ih}, Image Width: ls{iw}')
             print(f"Bounding Box: {bboxC.xmin * iw}, {bboxC.ymin * ih}, {bboxC.width * iw}, {bboxC.height * ih}")
             x, y, w, h = int(bboxC.xmin * iw), int(bboxC.ymin * ih), int(bboxC.width * iw), int(bboxC.height * ih)
 

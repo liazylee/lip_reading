@@ -12,7 +12,7 @@ accuracy (need to be approved)
 
 ## Research Plan 
 - [ ] implement the model I have trained on the grid corpus dataset
-  - [ ] use openCV to detect the mouth area 
+  - [x] use openCV to detect the mouth area 
   - [ ] padding the mouth area with time dimension to fit the model
 
 ## problems when implementing the model I need to solve
@@ -30,7 +30,33 @@ accuracy (need to be approved)
 try TensorFlow Visualization Toolkit [TensorBoard](https://www.tensorflow.org/tensorboard/get_started) and 
 [TensorBoardX](https://github.com/lanpa/tensorboardX) to visualize the training logs   
 
-# week
+# week plan for Feb 24th - Feb 29th
+
+## works have done
+- [x] show a presentation about the research plan and the confusion I have done
+
+
+
+## Research Plan
+- [ ] Download the whole dataset of the grid corpus
+- [ ] extract the mouth area feature,transform the frames to a series of frames that can be used as the input of the model
+
+
+## problems when implementing the model I need to solve
+- [ ]I don't know how to calculate the feature of the mouth area,how is it work?
+
+# week plan for Mar 1st - Mar 7th
+## works have done
+None 
+
+## Research Plan
+- [ ] understand the feature of the mouth area
+- [ ] pretrain the mouth area feature saved as npy file and use it as the input of the model
+- [ ] try to use the pretrained npy file to train the model
+- [ ] design different training architectures of the model get the training results
+
+## problems when implementing the model I need to solve
+Not yet
 
 
 
