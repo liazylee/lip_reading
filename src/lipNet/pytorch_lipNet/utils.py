@@ -18,5 +18,7 @@
                   ┃┫┫  ┃┫┫
                   ┗┻┛  ┗┻┛
 """
+import torch
 
-
+def CTCLoss(y_true, y_pred):
+    return torch.nn.CTCLoss()(y_pred, y_true)
