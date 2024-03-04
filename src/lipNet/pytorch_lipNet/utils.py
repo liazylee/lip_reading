@@ -18,12 +18,7 @@
                   ┃┫┫  ┃┫┫
                   ┗┻┛  ┗┻┛
 """
+import torch
 
-def mouth_extractor(file_path:str):
-    """
-    Extract the mouth from the video
-    :param file_path:
-    :return:
-    """
-    pass
-
+def CTCLoss(y_true, y_pred):
+    return torch.nn.CTCLoss()(y_pred, y_true)
