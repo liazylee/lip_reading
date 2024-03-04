@@ -19,11 +19,4 @@
                   ┗┻┛  ┗┻┛
 """
 
-def mouth_extractor(file_path:str):
-    """
-    Extract the mouth from the video
-    :param file_path:
-    :return:
-    """
-    pass
 
