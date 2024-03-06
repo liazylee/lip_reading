@@ -21,7 +21,7 @@
 
 
 
-DIR = 'data' # absolute path to the data directory
+DIR = '/home/liazylee/jobs/python/AI/lip_reading/src/lipNet/data/' # absolute path to the data directory
 LETTER_DICT ={'a': 97, 'b': 98, 'c': 99, 'd': 100,
               'e': 101, 'f': 102, 'g': 103,
               'h': 104, 'i': 105, 'j': 106,

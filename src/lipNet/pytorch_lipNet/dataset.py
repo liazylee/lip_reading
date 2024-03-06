@@ -23,6 +23,7 @@ import logging
 import os
 from typing import List, Tuple
 
+import torch
 from torch.utils.data import Dataset
 import numpy as np
 
@@ -38,6 +39,7 @@ class LRNetDataset(Dataset):
         data = []
         # load alignments
         alignments = glob.glob(self.dir + '/**/*.align', recursive=True)
+        logging.info(f'the total alignments files is {len(alignments)}')
         alignments_dict = {}
         for align in alignments:
             alignments_dict[align.split('/')[-1].split('.')[0]] = self.load_alignments(align)
@@ -62,12 +64,14 @@ class LRNetDataset(Dataset):
                 if line[2] != 'sil':
                     tokens = tokens + ' ' + line[2]
             tokens_np = np.array([LETTER_DICT[c] for c in tokens])
+            # padding the tokens
+
             return tokens_np
 
     def __len__(self):
         return len(self.data)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx)->Tuple[torch.Tensor, torch.Tensor]:
         (video_frames,alignments) = self.data[idx]
-        return video_frames,alignments
+        return torch.from_numpy(video_frames).float(), torch.from_numpy(alignments).float()
 

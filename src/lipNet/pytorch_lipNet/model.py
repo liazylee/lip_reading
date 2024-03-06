@@ -22,12 +22,12 @@ import torch
 import torch.nn as nn
 
 from src.lipNet.pytorch_lipNet.config import LETTER_SIZE
-
+from  torch.nn import functional as F
 
 class LRModel(nn.Module):
     def __init__(self):
         super(LRModel, self).__init__()
-        self.conv1 = nn.Conv3d(3, 128, kernel_size=(3, 3, 3), padding=(1, 1, 1))
+        self.conv1 = nn.Conv3d(1, 128, kernel_size=(3, 3, 3), padding=(1, 1, 1))
         self.relu1 = nn.ReLU()
         self.pool1 = nn.MaxPool3d(kernel_size=(1, 2, 2))
 

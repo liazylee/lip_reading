@@ -18,18 +18,20 @@
                   ┃┫┫  ┃┫┫
                   ┗┻┛  ┗┻┛
 """
+from torch.nn.utils.rnn import pad_sequence
+
 from src.lipNet.pytorch_lipNet.dataset import LRNetDataset
 from torch.utils.data import DataLoader
 import torch
 
-class LRNetDataLoader:
-    def __init__(self, dir: str, batch_size: int=200, num_workers: int=4, shuffle: bool=True):
-        self.dir = dir
-        self.batch_size = batch_size
-        self.num_workers = num_workers
-        self.shuffle = shuffle
+class LRNetDataLoader(DataLoader):
+    def __init__(self, dataset: LRNetDataset, batch_size: int=32, num_workers: int=4, shuffle: bool=True):
+        super(LRNetDataLoader, self).__init__(dataset, batch_size=batch_size, num_workers=num_workers, shuffle=shuffle,
+                                              collate_fn=collate_fn)
 
-    def get_data_loader(self) -> DataLoader:
-        dataset = LRNetDataset(self.dir)
-        return DataLoader(dataset, batch_size=self.batch_size, num_workers=self.num_workers, shuffle=self.shuffle)
 
+def collate_fn(batch):
+    inputs, targets = zip(*batch)
+    padded_inputs = pad_sequence(inputs, batch_first=True, padding_value=0)
+    padded_targets = pad_sequence(targets, batch_first=True, padding_value=0)
+    return padded_inputs, padded_targets

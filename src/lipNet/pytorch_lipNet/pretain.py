@@ -2,25 +2,31 @@
 import logging
 import sys
 import glob
+import time
 
 from tqdm import tqdm
 
-from src.lipNet.pytorch_lipNet.config import DIR
-from src.lipNet.pytorch_lipNet.utils import mouth_extractor, timmer
+from config import DIR
+from utils import mouth_extractor, timmer
+import multiprocessing as mp
 
-
-@timmer
+# @timmer
 def pretain(dir:str)->None:
     """
     find all the video and extra the mouth region
     :param dir:
     :return:
     """
-
+    time1=time.time()
     video_list=glob.glob(dir+'/**/*.mpg',recursive=True)
-    for i in tqdm(range(len(video_list)),desc='Extracting mouth region from video',ncols=100):
-        mouth_extractor(video_list[i])
-        
+    # use multi-thread to extract the mouth region
+    with mp.Pool(processes=mp.cpu_count()) as pool:
+        pool.map(mouth_extractor,video_list)
+    print(f'Pretain took {time.time()-time1} seconds')
+    # for video in tqdm(video_list):
+    #     mouth_extractor(video)
+
+
 
 
 if __name__ == '__main__':
