@@ -24,8 +24,9 @@ from src.lipNet.pytorch_lipNet.dataset import LRNetDataset
 from torch.utils.data import DataLoader
 import torch
 
+
 class LRNetDataLoader(DataLoader):
-    def __init__(self, dataset: LRNetDataset, batch_size: int=32, num_workers: int=4, shuffle: bool=True):
+    def __init__(self, dataset: LRNetDataset, batch_size: int = 32, num_workers: int = 4, shuffle: bool = True):
         super(LRNetDataLoader, self).__init__(dataset, batch_size=batch_size, num_workers=num_workers, shuffle=shuffle,
                                               collate_fn=collate_fn)
 
@@ -34,4 +35,4 @@ def collate_fn(batch):
     inputs, targets = zip(*batch)
     padded_inputs = pad_sequence(inputs, batch_first=True, padding_value=0)
     padded_targets = pad_sequence(targets, batch_first=True, padding_value=0)
-    return padded_inputs, padded_targets
+    return padded_inputs, padded_targets,

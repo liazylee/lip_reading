@@ -73,24 +73,9 @@ def main():
                     writer.add_histogram(f'{name}.grad', param.grad, i)
                 # print(f'Epoch {epoch}, Batch {i}, Loss {loss.item()}')
         train_loss_curve.append(train_loss / len(train_dataset))
-        for i, (inputs, targets) in enumerate(val_loader):
-            inputs, targets = inputs.to(device), targets.to(device)
-            outputs = model(inputs)
-            outputs = outputs.permute(1, 0, 2)
-            input_lengths = torch.full(size=(outputs.size(1),), fill_value=outputs.size(0), dtype=torch.long)
-            target_lengths = torch.full(size=(targets.size(0),), fill_value=targets.size(1), dtype=torch.long)
-            loss = criterion(outputs, targets, input_lengths, target_lengths)
-            val_loss += loss.item()
-            if i % 10 == 0:
-                writer.add_scalar('val_loss', loss.item(), i)
-                # print(f'Epoch {epoch}, Batch {i}, Loss {loss.item()}')
-        val_loss_curve.append(val_loss / len(train_dataset))
-        train_wer_curve.append(train_wer / len(train_dataset))
-        val_wer_curve.append(val_wer / len(train_dataset))
-        writer.add_scalar('train_wer', train_wer / len(train_dataset), epoch)
-        writer.add_scalar('val_wer', val_wer / len(train_dataset), epoch)
-        writer.add_scalar('train_loss', train_loss / len(train_dataset), epoch)
-        writer.add_scalar('val_loss', val_loss / len(train_dataset), epoch)
+        writer.add_scalar('train_loss_curve', train_loss / len(train_dataset), epoch)
+        # validation
+
     if not os.path.exists('./model'):
         os.mkdir('./model')
     if not os.path.exists('./log'):

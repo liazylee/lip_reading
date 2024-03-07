@@ -23,11 +23,12 @@ import torch.nn as nn
 
 from src.lipNet.pytorch_lipNet.config import LETTER_SIZE
 from  torch.nn import functional as F
-
+# summary of the model
+from torchsummary import summary
 class LRModel(nn.Module):
     def __init__(self):
         super(LRModel, self).__init__()
-        self.conv1 = nn.Conv3d(1, 128, kernel_size=(3, 3, 3), padding=(1, 1, 1))
+        self.conv1 = nn.Conv3d(1, 128, kernel_size=(3, 3, 3), padding=(1, 1, 1),)
         self.relu1 = nn.ReLU()
         self.pool1 = nn.MaxPool3d(kernel_size=(1, 2, 2))
 
@@ -75,4 +76,10 @@ def CTCLoss(y_true, y_pred):
 
     loss = nn.CTCLoss(blank=0, zero_infinity=True)(y_pred, y_true, input_length, label_length)
     return loss
+
+if __name__ == '__main__':
+    model = LRModel()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+    print(model)
 
