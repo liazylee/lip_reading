@@ -21,20 +21,23 @@
 import os
 from typing import Tuple
 
-from config import DIR
-from dataset_loader import LRNetDataLoader
-from dataset import LRNetDataset
-from src.lipNet.pytorch_lipNet.model import LRModel
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from tensorboardX import SummaryWriter
 
-def load_train_test_data()->Tuple[torch.utils.data.Subset, torch.utils.data.Subset]:
+from config import DIR
+from dataset import LRNetDataset
+from dataset_loader import LRNetDataLoader
+from src.lipNet.pytorch_lipNet.model import LRModel
+
+
+def load_train_test_data() -> Tuple[torch.utils.data.Subset, torch.utils.data.Subset]:
     video_dataset = LRNetDataset(DIR)
     train_size = int(0.8 * len(video_dataset))
     test_size = len(video_dataset) - train_size
     return torch.utils.data.random_split(video_dataset, [train_size, test_size])
+
 
 def main():
     # use GPU
@@ -48,7 +51,7 @@ def main():
     model = LRModel().to(device)
     criterion = nn.CTCLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
-    train_loss_curve,val_loss_curve,train_wer_curve,val_wer_curve = [],[],[],[]
+    train_loss_curve, val_loss_curve, train_wer_curve, val_wer_curve = [], [], [], []
     for epoch in range(10):
         train_loss = 0
         val_loss = 0
@@ -58,7 +61,7 @@ def main():
             inputs, targets = inputs.to(device), targets.to(device)
             optimizer.zero_grad()
             outputs = model(inputs)
-            outputs = outputs.permute(1, 0, 2) # (time, batch, n_class)
+            outputs = outputs.permute(1, 0, 2)  # (time, batch, n_class)
             input_lengths = torch.full(size=(outputs.size(1),), fill_value=outputs.size(0), dtype=torch.long)
             target_lengths = torch.full(size=(targets.size(0),), fill_value=targets.size(1), dtype=torch.long)
             loss = criterion(outputs, targets, input_lengths, target_lengths)
@@ -84,6 +87,7 @@ def main():
     torch.save(model.state_dict(), './model/lRnet.pth')
     writer.export_scalars_to_json("./log/all_scalars.json")
     writer.close()
+
 
 if __name__ == '__main__':
     main()

@@ -23,15 +23,15 @@ import logging
 import os
 from typing import List, Tuple
 
+import numpy as np
 import torch
 from torch.utils.data import Dataset
-import numpy as np
 
-from src.lipNet.pytorch_lipNet.config import LETTER_DICT
+from config import LETTER_DICT
 
 
 class LRNetDataset(Dataset):
-    def __init__(self, dir:str)->None:
+    def __init__(self, dir: str) -> None:
         self.dir = dir
         self.data = self.load_data()
 
@@ -39,6 +39,7 @@ class LRNetDataset(Dataset):
         data = []
         # load alignments
         alignments = glob.glob(self.dir + '/**/*.align', recursive=True)
+        print(f'the total alignments files is {len(alignments)}')
         logging.info(f'the total alignments files is {len(alignments)}')
         alignments_dict = {}
         for align in alignments:
@@ -55,7 +56,8 @@ class LRNetDataset(Dataset):
                         alignments = ''
                     data.append((video_frames, alignments))
         return data
-    def load_alignments(self,path: str) -> np.array:
+
+    def load_alignments(self, path: str) -> np.array:
         with open(path, 'r') as f:
             lines = f.readlines()
             tokens = ''
@@ -71,7 +73,6 @@ class LRNetDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
-    def __getitem__(self, idx)->Tuple[torch.Tensor, torch.Tensor]:
-        (video_frames,alignments) = self.data[idx]
+    def __getitem__(self, idx) -> Tuple[torch.Tensor, torch.Tensor]:
+        (video_frames, alignments) = self.data[idx]
         return torch.from_numpy(video_frames).float(), torch.from_numpy(alignments).float()
-
