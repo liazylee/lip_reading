@@ -21,7 +21,7 @@
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader
 
-from src.lipNet.pytorch_lipNet.dataset import LRNetDataset
+from dataset import LRNetDataset
 
 
 class LRNetDataLoader(DataLoader):
@@ -33,6 +33,7 @@ class LRNetDataLoader(DataLoader):
 def collate_fn(batch):
     inputs, targets = zip(*batch)
     padded_inputs = pad_sequence(inputs, batch_first=True, padding_value=0)
+    # (batch, channel, time, height, width) -> (batch, time, channel, height, width)
     padded_inputs = padded_inputs.permute(0, 4, 1, 2, 3)
     padded_targets = pad_sequence(targets, batch_first=True, padding_value=0)
     return padded_inputs, padded_targets,

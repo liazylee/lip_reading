@@ -20,10 +20,12 @@
 """
 import torch
 import torch.nn as nn
-# summary of the model
-from torchsummary import summary
+from torchinfo import summary
 
 from config import LETTER_SIZE
+
+
+# summary of the model
 
 
 class LRModel(nn.Module):
@@ -41,15 +43,18 @@ class LRModel(nn.Module):
         self.relu3 = nn.ReLU()
         self.pool3 = nn.MaxPool3d(kernel_size=(1, 2, 2))
 
-        self.flatten = nn.Flatten(2, 2)
+        self.flatten = nn.Flatten(2, 4)
         self.lstm1 = nn.LSTM(input_size=17408, hidden_size=128, num_layers=2, batch_first=True,
                              bidirectional=True)
-        self.dropout1 = nn.Dropout(0.5)
+        # self.lstm1 = nn.LSTM(input_size=5120, hidden_size=128, num_layers=2, batch_first=True,
+        #                      bidirectional=True)
+        # self.gru1 = nn.GRU(input_size=5120, hidden_size=128, num_layers=2, batch_first=True, bidirectional=True)
 
+        self.dropout1 = nn.Dropout(0.5)
+        # self.gru2 = nn.GRU(input_size=128 * 2, hidden_size=128, num_layers=2, batch_first=True, bidirectional=True)
         self.lstm2 = nn.LSTM(input_size=128 * 2, hidden_size=128, num_layers=2, batch_first=True, bidirectional=True)
         self.dropout2 = nn.Dropout(0.5)
-
-        self.fc = nn.Linear(128 * 2, LETTER_SIZE + 1)  # Output layer
+        self.fc = nn.Linear(128 * 2, LETTER_SIZE + 1)
 
     def forward(self, x):
         x = self.pool1(self.relu1(self.conv1(x)))
@@ -61,16 +66,19 @@ class LRModel(nn.Module):
         # torch.Size([2, 128, 75, 8, 17])
         # (B, C, T, H, W)->(T, B, C, H, W)
         x = x.permute(2, 0, 1, 3, 4).contiguous()
+        # print(x.size(), 'permute')
         # (B, C, T, H, W)->(T, B, C*H*W)
-        torch.Size([75, 2, 128, 8, 17])
-        x = x.view(x.size(0), x.size(1), -1)
+        # torch.Size([75, 2, 128, 8, 17])
+        # x = x.view(x.size(0), x.size(1), -1)
         x = self.flatten(x)
         # torch.Size([75, 2, 17408])
         print(x.size(), 'flatten')
-        print(x.shape, 'flatten')
+        x = x.permute(1, 0, 2)
         x, _ = self.lstm1(x)
+        # x, _ = self.gru1(x)
         x = self.dropout1(x)
         x, _ = self.lstm2(x)
+        # x, _ = self.gru2(x)
         x = self.dropout2(x)
         x = self.fc(x[:, -1, :])
         return x
@@ -81,4 +89,5 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
     print(model)
-    print(summary(model, (3, 75, 70, 140)))  # Fix this code in LSTM
+    # print(model.lstm1)
+    print(summary(model, input_size=(2, 3, 75, 70, 140)))

@@ -18,7 +18,6 @@
                   ┃┫┫  ┃┫┫
                   ┗┻┛  ┗┻┛
 """
-import os
 from typing import Tuple
 
 import torch
@@ -29,7 +28,7 @@ from tensorboardX import SummaryWriter
 from config import DIR
 from dataset import LRNetDataset
 from dataset_loader import LRNetDataLoader
-from src.lipNet.pytorch_lipNet.model import LRModel
+from model import LRModel
 
 
 def load_train_test_data() -> Tuple[torch.utils.data.Subset, torch.utils.data.Subset]:
@@ -40,12 +39,11 @@ def load_train_test_data() -> Tuple[torch.utils.data.Subset, torch.utils.data.Su
 
 
 def main():
-    # use GPU
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     train_dataset, val_dataset = load_train_test_data()
-    train_loader = LRNetDataLoader(train_dataset, batch_size=32, num_workers=4, shuffle=True)
-    val_loader = LRNetDataLoader(val_dataset, batch_size=32, num_workers=4, shuffle=True)
+    train_loader = LRNetDataLoader(train_dataset, batch_size=4, num_workers=4, shuffle=True)
+    val_loader = LRNetDataLoader(val_dataset, batch_size=4, num_workers=4, shuffle=True)
     writer = SummaryWriter()
     # Load model
     model = LRModel().to(device)
@@ -77,16 +75,8 @@ def main():
                 # print(f'Epoch {epoch}, Batch {i}, Loss {loss.item()}')
         train_loss_curve.append(train_loss / len(train_dataset))
         writer.add_scalar('train_loss_curve', train_loss / len(train_dataset), epoch)
-        # validation
 
-    if not os.path.exists('./model'):
-        os.mkdir('./model')
-    if not os.path.exists('./log'):
-        os.mkdir('./log')
-    params = list(model.parameters())
-    torch.save(model.state_dict(), './model/lRnet.pth')
-    writer.export_scalars_to_json("./log/all_scalars.json")
-    writer.close()
+        # validation
 
 
 if __name__ == '__main__':
