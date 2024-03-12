@@ -29,6 +29,7 @@ from config import DIR
 from dataset import LRNetDataset
 from dataset_loader import LRNetDataLoader
 from model import LRModel
+from utils import validate, decode_tensor, calculate_wer, calculate_cer, ctc_decode_tensor
 
 
 def load_train_test_data() -> Tuple[torch.utils.data.Subset, torch.utils.data.Subset]:
@@ -49,21 +50,27 @@ def main():
     model = LRModel().to(device)
     criterion = nn.CTCLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
-    train_loss_curve, val_loss_curve, train_wer_curve, val_wer_curve = [], [], [], []
+
     for epoch in range(10):
-        train_loss = 0
-        val_loss = 0
-        train_wer = 0
-        val_wer = 0
+        (train_loss_curve, val_loss_curve, train_wer_curve, val_wer_curve,
+         train_cer_curve, val_cer_curve) = [], [], [], [], [], []
+
         for i, (inputs, targets) in enumerate(train_loader):
+            train_loss, train_wer, train_cer = 0, 0, 0
             inputs, targets = inputs.to(device), targets.to(device)
             optimizer.zero_grad()
-            outputs = model(inputs)
-            outputs = outputs.permute(1, 0, 2)  # (time, batch, n_class)
-            input_lengths = torch.full(size=(outputs.size(1),), fill_value=outputs.size(0), dtype=torch.long)
-            target_lengths = torch.full(size=(targets.size(0),), fill_value=targets.size(1), dtype=torch.long)
+            outputs = model(inputs)  # (batch, n_class)
+            # torch.Size([4, 28])
+            # outputs = outputs.permute(1, 0)  # (time, batch, n_class)
+            input_lengths = torch.full(size=(outputs.size(0),), fill_value=outputs.size(1), dtype=torch.long)
+            target_lengths = torch.full(size=(targets.size(1),), fill_value=targets.size(0), dtype=torch.long)
             loss = criterion(outputs, targets, input_lengths, target_lengths)
-
+            text_outputs = ctc_decode_tensor(outputs, input_lengths, greedy=True)
+            text_targets = decode_tensor(targets)
+            train_wer = calculate_wer(text_outputs, text_targets)
+            train_cer = calculate_cer(text_outputs, text_targets)
+            train_wer_curve.append(train_wer)
+            train_cer_curve.append(train_cer)
             loss.backward()
             optimizer.step()
             train_loss += loss.item()
@@ -76,7 +83,12 @@ def main():
         train_loss_curve.append(train_loss / len(train_dataset))
         writer.add_scalar('train_loss_curve', train_loss / len(train_dataset), epoch)
 
+        # calculate the wer
+
         # validation
+        val_loss = validate(model, criterion, val_loader, device)
+        val_loss_curve.append(val_loss)
+        writer.add_scalar('val_loss_curve', val_loss, epoch)
 
 
 if __name__ == '__main__':
