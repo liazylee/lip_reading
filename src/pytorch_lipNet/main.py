@@ -58,14 +58,19 @@ def main():
         for i, (inputs, targets) in enumerate(train_loader):
             train_loss, train_wer, train_cer = 0, 0, 0
             inputs, targets = inputs.to(device), targets.to(device)
+            # torch.Size([4, 3, 75, 70, 140]), torch.Size([4, 28])
             optimizer.zero_grad()
-            outputs = model(inputs)  # (batch, n_class)
-            # torch.Size([4, 28])
-            # outputs = outputs.permute(1, 0)  # (time, batch, n_class)
-            input_lengths = torch.full(size=(outputs.size(0),), fill_value=outputs.size(1), dtype=torch.long)
-            target_lengths = torch.full(size=(targets.size(1),), fill_value=targets.size(0), dtype=torch.long)
-            loss = criterion(outputs, targets, input_lengths, target_lengths)
-            text_outputs = ctc_decode_tensor(outputs, input_lengths, greedy=True)
+            outputs = model(inputs)  # (batch, time, n_class) # torch.Size([4, 75, 28])
+
+            inputs_lengths = torch.full(size=(outputs.size(0),), fill_value=outputs.size(1),
+                                        dtype=torch.long)  # tensor([75, 75, 75, 75])
+            targets_lengths = torch.full(size=(targets.size(1),), fill_value=targets.size(0),
+                                         dtype=torch.long)  # torch.Size([29])
+            loss = criterion(outputs, targets, inputs_lengths, targets_lengths)
+            # input_lengths = torch.full(size=(outputs.size(0),), fill_value=outputs.size(1), dtype=torch.long)
+            # target_lengths = torch.full(size=(targets.size(1),), fill_value=targets.size(0), dtype=torch.long)
+            # loss = criterion(outputs, targets, input_lengths, target_lengths)
+            text_outputs = ctc_decode_tensor(outputs, inputs_lengths, greedy=True)
             text_targets = decode_tensor(targets)
             train_wer = calculate_wer(text_outputs, text_targets)
             train_cer = calculate_cer(text_outputs, text_targets)

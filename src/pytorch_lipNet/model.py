@@ -48,7 +48,7 @@ class LRModel(nn.Module):
                              bidirectional=True)
         # self.lstm1 = nn.LSTM(input_size=5120, hidden_size=128, num_layers=2, batch_first=True,
         #                      bidirectional=True)
-        # self.gru1 = nn.GRU(input_size=5120, hidden_size=128, num_layers=2, batch_first=True, bidirectional=True)
+        # self.gru1 = nn.GRU(input_size=17408, hidden_size=128, num_layers=2, batch_first=True, bidirectional=True)
 
         self.dropout1 = nn.Dropout(0.5)
         # self.gru2 = nn.GRU(input_size=128 * 2, hidden_size=128, num_layers=2, batch_first=True, bidirectional=True)
@@ -80,7 +80,7 @@ class LRModel(nn.Module):
         x, _ = self.lstm2(x)
         # x, _ = self.gru2(x)
         x = self.dropout2(x)
-        x = self.fc(x[:, -1, :])
+        x = self.fc(x)
         return x
 
 
