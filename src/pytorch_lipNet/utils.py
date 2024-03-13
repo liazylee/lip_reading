@@ -20,12 +20,14 @@
 """
 
 from functools import reduce
+from typing import Tuple
 
 import cv2
 import numpy as np
 import torch
 
-from config import NUMBER_DICT
+from config import NUMBER_DICT, DIR
+from dataset import LRNetDataset
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
@@ -51,24 +53,26 @@ def mouth_extractor(file_path: str, scale_factor=1.3, min_neighbors=5, mouth_siz
             ret, frame = cap.read()
             if not ret:
                 raise Exception("Error: Could not read frame.")
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # Convert to grayscale
-            faces = face_cascade.detectMultiScale(gray, scale_factor, min_neighbors)
+            # 参数分别为低阈值和高阈值
+            faces = face_cascade.detectMultiScale(frame, scale_factor, min_neighbors)
             for (x, y, w, h) in faces:
-                mouth_roi = frame[y + int(h / 2):y + h, x:x + w]
+                mouth_roi = frame[y + int(h / 2):y + h, x:x + w, :]
+
                 mouth_roi = cv2.resize(mouth_roi, mouth_size)
-                mouth_roi = cv2.cvtColor(mouth_roi, cv2.COLOR_BGR2GRAY)
                 frames.append(mouth_roi)
 
         cap.release()
 
         # Normalize frames
-        frames = np.array(frames)
-        mean = np.mean(frames)
+        frames_tensor = np.array(frames)
+        mean = np.mean(frames_tensor)
         std = np.std(frames)
         frames_tensor = (frames - mean) / std
-        frames_tensor = np.expand_dims(frames_tensor, axis=-1)
+        # frames_tensor = np.expand_dims(frames_tensor, axis=-1)
         # Save as npy file
+
         np.save(base_path + '.npy', frames_tensor)
+        return frames_tensor
     else:
         raise Exception("Error: File format not supported.")
 
@@ -88,7 +92,7 @@ def timmer(func):
 
 # evaluate the model with the test data
 def validate(model: torch.nn.Module, criterion: torch.nn.Module,
-             val_loader: torch.utils.data.DataLoader, device: torch.device) -> float:
+             val_loader: torch.utils.data.DataLoader, device: torch.device) -> Tuple[float, float, float]:
     """
 
     :param model:
@@ -98,8 +102,7 @@ def validate(model: torch.nn.Module, criterion: torch.nn.Module,
     :return:
     """
     model.eval()  # Set the model to evaluation mode
-    val_loss = 0
-
+    val_loss, val_wer, val_cer = 0, 0, 0
     with torch.no_grad():  # Disable gradient calculation during validation
         for inputs, targets in val_loader:
             inputs, targets = inputs.to(device), targets.to(device)
@@ -107,48 +110,82 @@ def validate(model: torch.nn.Module, criterion: torch.nn.Module,
             outputs = outputs.permute(1, 0, 2)  # (time, batch, n_class)
             input_lengths = torch.full(size=(outputs.size(1),), fill_value=outputs.size(0), dtype=torch.long)
             target_lengths = torch.full(size=(targets.size(0),), fill_value=targets.size(1), dtype=torch.long)
+            text_outputs: str = ctc_decode_tensor(outputs, input_lengths)
+            text_targets: str = decode_tensor(targets)
+            val_wer = calculate_wer(text_outputs, text_targets)
+            val_cer = calculate_cer(text_outputs, text_targets)
             loss = criterion(outputs, targets, input_lengths, target_lengths)
+
             val_loss += loss.item()
 
     avg_val_loss = val_loss / len(val_loader.dataset)
-    return avg_val_loss
+    val_wer = val_wer / len(val_loader.dataset)
+    val_cer = val_cer / len(val_loader.dataset)
+    return avg_val_loss, val_wer, val_cer
 
 
 # decode the tensor to string
 
-def decode_tensor(tensor: torch.Tensor) -> str:
+def decode_tensor(tensor: torch.Tensor, number_dict: dict = NUMBER_DICT) -> str:
     """
-    :param tensor:(4,28)
-    :return: str
+  Decodes a tensor into a string using a mapping dictionary.
+    Args:
+        tensor (torch.Tensor): Input tensor of shape (4, 28) containing numerical indices.
+        NUMBER_DICT (dict): Dictionary mapping numerical indices to characters.
+    Returns:
+        str: The decoded string.
     """
     tensors = tensor.tolist()
     result = ''
     for tensor in tensors:
-        result += reduce(lambda x, y: x + y, [NUMBER_DICT[i] if i != 0 else '' for i in tensor])
+        result += reduce(lambda x, y: x + y, [number_dict[i] if i != 0 else '' for i in tensor])
     return result
 
 
-# ctc decode the tensor to string
-def ctc_decode_tensor(tensor: torch.Tensor, input_lengths: torch.Tensor, greedy: bool = True) -> str:
+def ctc_decode_tensor(logits, input_lengths, number_dict: dict = NUMBER_DICT, blank_label=0, collapse_repeated=True) \
+        -> str:
     """
-    :param tensor: (4,28)
-    :param input_lengths: (4,)
-    :param greedy: bool
-    :return: str
+    Decodes the output tensor from a CTC-trained model into human-readable strings.
+    Assumes logits are in 'log softmax' form.
+
+    Args:
+        logits (Tensor): The model's raw output of shape (T, N, C).
+        input_lengths (Tensor): The actual lengths of each sequence in the batch.
+        number_dict (dict): Mapping from numerical indices to characters.
+        blank_label (int): The index of the blank label in logits.
+        collapse_repeated (bool): If True, collapse repeated characters.
+
+    Returns:
+        List[str]: Decoded strings for each sequence in the batch.
     """
-    if greedy:
-        # Greedy decoding
-        # _, decoded = tensor.max(dim=-1)
-        decoder = torch.nn.CTCLoss()
-        decoder = decoder.ctc_decode(tensor, input_lengths, greedy=True)
-        return decoder[0][0].tolist()
-    else:
-        decoder = torch.nn.CTCLoss()
-        decoder = decoder.ctc_decode(tensor, input_lengths, greedy=False)
-        return decoder[0][0].tolist()
+    decoded_strings = []
+
+    # Assuming logits are already in log softmax form
+    max_probs, max_indices = torch.max(logits, 2)  # (T, N)
+
+    for i, length in enumerate(input_lengths):
+        raw_sequence = max_indices[:, i][:length].tolist()  # Truncate to actual length
+        decoded_sequence = []
+
+        last_label = None
+        for label in raw_sequence:
+            if label != last_label or not collapse_repeated:
+                if label != blank_label:
+                    decoded_sequence.append(number_dict.get(label, ''))
+            last_label = label
+
+        decoded_string = ''.join(decoded_sequence)
+        decoded_strings.append(decoded_string)
+
+    return ''.join(decoded_strings)
 
 
-# caculate the wer
+def load_train_test_data(split_ratio: float = 0.8) -> Tuple[torch.utils.data.Subset, torch.utils.data.Subset]:
+    video_dataset = LRNetDataset(DIR)
+    train_size = int(split_ratio * len(video_dataset))
+    test_size = len(video_dataset) - train_size
+    return torch.utils.data.random_split(video_dataset, [train_size, test_size])
+
 
 def calculate_wer(predicted: str, true: str) -> float:
     """

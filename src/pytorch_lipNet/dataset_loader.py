@@ -25,7 +25,7 @@ from dataset import LRNetDataset
 
 
 class LRNetDataLoader(DataLoader):
-    def __init__(self, dataset: LRNetDataset, batch_size: int = 32, num_workers: int = 4, shuffle: bool = True):
+    def __init__(self, dataset: LRNetDataset, batch_size: int = 4, num_workers: int = 4, shuffle: bool = True):
         super(LRNetDataLoader, self).__init__(dataset, batch_size=batch_size, num_workers=num_workers, shuffle=shuffle,
                                               collate_fn=collate_fn)
 

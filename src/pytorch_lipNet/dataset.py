@@ -33,10 +33,18 @@ from config import LETTER_DICT
 class LRNetDataset(Dataset):
     def __init__(self, dir: str) -> None:
         self.dir = dir
-        self.data = self.load_data()
+        self.video_list = self.load_video(dir)
+        self.alignments = self.load_alignments_dict()
 
-    def load_data(self) -> List[Tuple[np.ndarray, np.ndarray]]:
-        data = []
+    def load_video(self, path: str) -> List[str]:
+        video_list = []
+        for root, dir, files in os.walk(self.dir):
+            for file in files:
+                if file.endswith('.npy'):
+                    video_list.append(os.path.join(root, file))
+        return video_list
+
+    def load_alignments_dict(self) -> dict:
         # load alignments
         alignments = glob.glob(self.dir + '/**/*.align', recursive=True)
         print(f'the total alignments files is {len(alignments)}')
@@ -44,18 +52,7 @@ class LRNetDataset(Dataset):
         alignments_dict = {}
         for align in alignments:
             alignments_dict[align.split('/')[-1].split('.')[0]] = self.load_alignments(align)
-        for root, dir, files in os.walk(self.dir):
-            for file in files:
-                if file.endswith('.npy'):
-                    video_frames = np.load(os.path.join(root, file))
-                    filename = file.split('.')[0]
-                    if filename in alignments_dict:
-                        alignments = alignments_dict[filename]
-                    else:
-                        logging.warning(f'No alignment found for {filename}')
-                        alignments = ''
-                    data.append((video_frames, alignments))
-        return data
+        return alignments_dict
 
     def load_alignments(self, path: str) -> np.array:
         with open(path, 'r') as f:
@@ -71,8 +68,9 @@ class LRNetDataset(Dataset):
             return tokens_np
 
     def __len__(self):
-        return len(self.data)
+        return len(self.video_list)
 
     def __getitem__(self, idx) -> Tuple[torch.Tensor, torch.Tensor]:
-        (video_frames, alignments) = self.data[idx]
+        video_frames = np.load(self.video_list[idx])
+        alignments = self.alignments.get(self.video_list[idx].split('/')[-1].split('.')[0])
         return torch.from_numpy(video_frames).float(), torch.from_numpy(alignments).float()
