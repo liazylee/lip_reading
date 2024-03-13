@@ -23,10 +23,11 @@ from functools import reduce
 from typing import Tuple
 
 import cv2
+import editdistance
 import numpy as np
 import torch
 
-from config import NUMBER_DICT, DIR
+from config import NUMBER_DICT, DIR, LETTER_SIZE
 from dataset import LRNetDataset
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -105,18 +106,16 @@ def validate(model: torch.nn.Module, criterion: torch.nn.Module,
     # model.eval()  # Set the model to evaluation mode
     val_loss, val_wer, val_cer = [], [], []
     with torch.no_grad():  # Disable gradient calculation during validation
-        for inputs, targets in val_loader:
+        for inputs, targets, input_lengths, target_lengths in val_loader:
             inputs, targets = inputs.to(device), targets.to(device)
             outputs = model(inputs)
             outputs = outputs.permute(1, 0, 2)  # (time, batch, n_class)
-            input_lengths = torch.full(size=(outputs.size(1),), fill_value=outputs.size(0), dtype=torch.long)
-            target_lengths = torch.full(size=(targets.size(0),), fill_value=targets.size(1), dtype=torch.long)
-            text_outputs: str = ctc_decode_tensor(outputs, input_lengths)
+            text_outputs: str = ctc_decode_tensor(outputs)
             text_targets: str = decode_tensor(targets)
             val_wer.append(calculate_wer(text_outputs, text_targets))
             val_cer.append(calculate_cer(text_outputs, text_targets))
             loss = criterion(outputs, targets, input_lengths, target_lengths)
-            outputs_detached = outputs.detach()
+            # outputs_detached = outputs.detach()
             val_loss.append(loss.item())
 
     avg_val_loss, val_wer, val_cer = np.mean(val_loss), np.mean(val_wer), np.mean(val_cer)
@@ -126,7 +125,7 @@ def validate(model: torch.nn.Module, criterion: torch.nn.Module,
 
 # decode the tensor to string
 
-def decode_tensor(tensor: torch.Tensor, number_dict: dict = NUMBER_DICT) -> str:
+def decode_tensor(tensor: torch.Tensor, ) -> str:
     """
   Decodes a tensor into a string using a mapping dictionary.
     Args:
@@ -138,12 +137,12 @@ def decode_tensor(tensor: torch.Tensor, number_dict: dict = NUMBER_DICT) -> str:
     tensors = tensor.tolist()
     result = ''
     for tensor in tensors:
-        result += reduce(lambda x, y: x + y, [number_dict[i] if i != 0 else '' for i in tensor])
+        result += reduce(lambda x, y: x + y, [NUMBER_DICT.get(i, '') if i < LETTER_SIZE + 1 else '' for i in tensor])
     return result
 
 
 def ctc_decode_tensor(tensor: torch.Tensor,
-                      number_dict: dict = NUMBER_DICT, greedy: bool = True) -> str:
+                      greedy: bool = True) -> str:
     """
     Decodes a tensor into a string using a mapping dictionary.
     Args:
@@ -155,18 +154,19 @@ def ctc_decode_tensor(tensor: torch.Tensor,
     Returns: str
 
     """
-    blank_label = len(number_dict)
+    blank_label = len(NUMBER_DICT) + 1
     if greedy:
-        probabilities = torch.softmax(tensor, dim=-1)
-        # 解码每个序列
+        probabilities = torch.softmax(tensor, dim=-1)  # (time, batch, n_class)
         decoded_sequences = []
         for i in range(probabilities.shape[1]):
-            sequence = probabilities[:, i, :].argmax(dim=-1)  #
+            sequence = probabilities[:, i, :].argmax(-1)  # (time, n_class) -> (time,)
+            print(sequence, 'sequence')
             decoded_sequence = ""
             prev_label = None
             for label in sequence:
-                if label != prev_label and label != blank_label:  #
-                    decoded_sequence += number_dict[label.item()]
+                # print(label, type(label), label.item())
+                if label != prev_label and label != blank_label:
+                    decoded_sequence += NUMBER_DICT.get(label.item(), '')
                 prev_label = label
             decoded_sequences.append(decoded_sequence)
         return ' '.join(decoded_sequences)
@@ -188,18 +188,9 @@ def calculate_wer(predicted: str, true: str) -> float:
     :param true: str
     :return: float
     """
-    d = np.zeros((len(predicted) + 1, len(true) + 1), dtype=np.uint8)
-    for i in range(len(predicted) + 1):
-        d[i][0] = i
-    for j in range(len(true) + 1):
-        d[0][j] = j
-    for i in range(1, len(predicted) + 1):
-        for j in range(1, len(true) + 1):
-            if predicted[i - 1] == true[j - 1]:
-                d[i][j] = d[i - 1][j - 1]
-            else:
-                d[i][j] = min(d[i - 1][j - 1], d[i][j - 1], d[i - 1][j]) + 1
-    return d[len(predicted)][len(true)] / len(true)
+    word_pairs = [(p[0].split(' '), p[1].split(' ')) for p in zip(predicted, true)]
+    wer = [1.0 * editdistance.eval(p[0], p[1]) / len(p[1]) for p in word_pairs]
+    return wer
 
 
 # caculate the cer
@@ -210,15 +201,5 @@ def calculate_cer(predicted: str, true: str) -> float:
     :param true: str
     :return: float
     """
-    d = np.zeros((len(predicted) + 1, len(true) + 1), dtype=np.uint8)
-    for i in range(len(predicted) + 1):
-        d[i][0] = i
-    for j in range(len(true) + 1):
-        d[0][j] = j
-    for i in range(1, len(predicted) + 1):
-        for j in range(1, len(true) + 1):
-            if predicted[i - 1] == true[j - 1]:
-                d[i][j] = d[i - 1][j - 1]
-            else:
-                d[i][j] = min(d[i - 1][j - 1], d[i][j - 1], d[i - 1][j]) + 1
-    return d[len(predicted)][len(true)] / max(len(true), 1)
+    cer = [1.0 * editdistance.eval(p[0], p[1]) / len(p[1]) for p in zip(predicted, true)]
+    return cer

@@ -33,10 +33,10 @@ from config import LETTER_DICT
 class LRNetDataset(Dataset):
     def __init__(self, dir: str) -> None:
         self.dir = dir
-        self.video_list = self.load_video(dir)
+        self.video_list = self.load_video()
         self.alignments = self.load_alignments_dict()
 
-    def load_video(self, path: str) -> List[str]:
+    def load_video(self) -> List[str]:
         video_list = []
         for root, dir, files in os.walk(self.dir):
             for file in files:
@@ -73,4 +73,5 @@ class LRNetDataset(Dataset):
     def __getitem__(self, idx) -> Tuple[torch.Tensor, torch.Tensor]:
         video_frames = np.load(self.video_list[idx])
         alignments = self.alignments.get(self.video_list[idx].split('/')[-1].split('.')[0])
+
         return torch.from_numpy(video_frames).float(), torch.from_numpy(alignments).float()

@@ -48,8 +48,8 @@ class LRModel(nn.Module):
                              bidirectional=True)
         # self.initialize_lstm_forget_gate_bias(self.lstm1)
         self.dropout1 = nn.Dropout(0.5)
-        self.lstm2 = nn.LSTM(input_size=64 * 2, hidden_size=64, num_layers=2, batch_first=True, bidirectional=True)
-        self.dropout2 = nn.Dropout(0.5)
+        # self.lstm2 = nn.LSTM(input_size=64 * 2, hidden_size=64, num_layers=2, batch_first=True, bidirectional=True)
+        # self.dropout2 = nn.Dropout(0.5)
         self.fc = nn.Linear(64 * 2, LETTER_SIZE + 1)
 
     def forward(self, x):
@@ -64,8 +64,8 @@ class LRModel(nn.Module):
         x = x.permute(1, 0, 2)
         x, _ = self.lstm1(x)
         x = self.dropout1(x)
-        x, _ = self.lstm2(x)
-        x = self.dropout2(x)
+        # x, _ = self.lstm2(x)
+        # x = self.dropout2(x)
         x = self.fc(x)
         return x
 
