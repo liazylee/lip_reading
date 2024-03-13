@@ -92,7 +92,8 @@ def timmer(func):
 
 # evaluate the model with the test data
 def validate(model: torch.nn.Module, criterion: torch.nn.Module,
-             val_loader: torch.utils.data.DataLoader, device: torch.device) -> Tuple[float, float, float]:
+             val_loader: torch.utils.data.DataLoader, device: torch.device) -> Tuple[
+    np.float64, np.float64, np.float64]:
     """
 
     :param model:
@@ -101,8 +102,8 @@ def validate(model: torch.nn.Module, criterion: torch.nn.Module,
     :param device:
     :return:
     """
-    model.eval()  # Set the model to evaluation mode
-    val_loss, val_wer, val_cer = 0, 0, 0
+    # model.eval()  # Set the model to evaluation mode
+    val_loss, val_wer, val_cer = [], [], []
     with torch.no_grad():  # Disable gradient calculation during validation
         for inputs, targets in val_loader:
             inputs, targets = inputs.to(device), targets.to(device)
@@ -112,15 +113,14 @@ def validate(model: torch.nn.Module, criterion: torch.nn.Module,
             target_lengths = torch.full(size=(targets.size(0),), fill_value=targets.size(1), dtype=torch.long)
             text_outputs: str = ctc_decode_tensor(outputs, input_lengths)
             text_targets: str = decode_tensor(targets)
-            val_wer = calculate_wer(text_outputs, text_targets)
-            val_cer = calculate_cer(text_outputs, text_targets)
+            val_wer.append(calculate_wer(text_outputs, text_targets))
+            val_cer.append(calculate_cer(text_outputs, text_targets))
             loss = criterion(outputs, targets, input_lengths, target_lengths)
+            outputs_detached = outputs.detach()
+            val_loss.append(loss.item())
 
-            val_loss += loss.item()
+    avg_val_loss, val_wer, val_cer = np.mean(val_loss), np.mean(val_wer), np.mean(val_cer)
 
-    avg_val_loss = val_loss / len(val_loader.dataset)
-    val_wer = val_wer / len(val_loader.dataset)
-    val_cer = val_cer / len(val_loader.dataset)
     return avg_val_loss, val_wer, val_cer
 
 
@@ -142,42 +142,36 @@ def decode_tensor(tensor: torch.Tensor, number_dict: dict = NUMBER_DICT) -> str:
     return result
 
 
-def ctc_decode_tensor(logits, input_lengths, number_dict: dict = NUMBER_DICT, blank_label=0, collapse_repeated=True) \
-        -> str:
+def ctc_decode_tensor(tensor: torch.Tensor,
+                      number_dict: dict = NUMBER_DICT, greedy: bool = True) -> str:
     """
-    Decodes the output tensor from a CTC-trained model into human-readable strings.
-    Assumes logits are in 'log softmax' form.
-
+    Decodes a tensor into a string using a mapping dictionary.
     Args:
-        logits (Tensor): The model's raw output of shape (T, N, C).
-        input_lengths (Tensor): The actual lengths of each sequence in the batch.
-        number_dict (dict): Mapping from numerical indices to characters.
-        blank_label (int): The index of the blank label in logits.
-        collapse_repeated (bool): If True, collapse repeated characters.
+        tensor:
+        input_lengths:
+        number_dict:
+        greedy:
 
-    Returns:
-        List[str]: Decoded strings for each sequence in the batch.
+    Returns: str
+
     """
-    decoded_strings = []
-
-    # Assuming logits are already in log softmax form
-    max_probs, max_indices = torch.max(logits, 2)  # (T, N)
-
-    for i, length in enumerate(input_lengths):
-        raw_sequence = max_indices[:, i][:length].tolist()  # Truncate to actual length
-        decoded_sequence = []
-
-        last_label = None
-        for label in raw_sequence:
-            if label != last_label or not collapse_repeated:
-                if label != blank_label:
-                    decoded_sequence.append(number_dict.get(label, ''))
-            last_label = label
-
-        decoded_string = ''.join(decoded_sequence)
-        decoded_strings.append(decoded_string)
-
-    return ''.join(decoded_strings)
+    blank_label = len(number_dict)
+    if greedy:
+        probabilities = torch.softmax(tensor, dim=-1)
+        # 解码每个序列
+        decoded_sequences = []
+        for i in range(probabilities.shape[1]):
+            sequence = probabilities[:, i, :].argmax(dim=-1)  #
+            decoded_sequence = ""
+            prev_label = None
+            for label in sequence:
+                if label != prev_label and label != blank_label:  #
+                    decoded_sequence += number_dict[label.item()]
+                prev_label = label
+            decoded_sequences.append(decoded_sequence)
+        return ' '.join(decoded_sequences)
+    else:
+        pass
 
 
 def load_train_test_data(split_ratio: float = 0.8) -> Tuple[torch.utils.data.Subset, torch.utils.data.Subset]:

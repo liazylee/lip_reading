@@ -25,7 +25,7 @@ import torch.optim as optim
 from tensorboardX import SummaryWriter
 from torch.nn import functional as F
 
-from config import BATCH_SIZE, EPOCHS, LEARNING_RATE
+from config import BATCH_SIZE, EPOCHS, LEARNING_RATE, RANDOM_SEED
 from dataset_loader import LRNetDataLoader
 from model import LRModel
 from utils import validate, decode_tensor, calculate_wer, calculate_cer, ctc_decode_tensor, load_train_test_data
@@ -33,7 +33,8 @@ from utils import validate, decode_tensor, calculate_wer, calculate_cer, ctc_dec
 
 def main():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
+    torch.manual_seed(RANDOM_SEED)  # Set for testing
+    torch.cuda.manual_seed_all(RANDOM_SEED)
     train_dataset, val_dataset = load_train_test_data()
     train_loader = LRNetDataLoader(train_dataset, batch_size=BATCH_SIZE, num_workers=4, shuffle=True)
     val_loader = LRNetDataLoader(val_dataset, batch_size=BATCH_SIZE, num_workers=4, shuffle=True)
@@ -61,9 +62,10 @@ def main():
             targets_lengths = torch.full(size=(targets.size(0),), fill_value=targets.size(1),
                                          dtype=torch.long).to(device)  # tensor([33, 33, 33, 33])
             loss = criterion(outputs, targets, inputs_lengths, targets_lengths)
-            text_outputs: str = ctc_decode_tensor(outputs, inputs_lengths)
+            text_outputs: str = ctc_decode_tensor(outputs, )
             print(f'text_outputs: {text_outputs}')
             text_targets: str = decode_tensor(targets)
+            print(f'text_targets: {text_targets}')
             train_wer += calculate_wer(text_outputs, text_targets)
             train_cer += calculate_cer(text_outputs, text_targets)
             loss.backward()
@@ -92,6 +94,7 @@ def main():
         # val_loss = validate(model, criterion, val_loader, device)
         # val_loss_curve.append(val_loss)
         # writer.add_scalar('val_loss_curve', val_loss, epoch)
+        writer.close()
 
 
 if __name__ == '__main__':
