@@ -36,7 +36,6 @@ class LRNetDataLoader(DataLoader):
 def collate_fn(batch) -> Tuple[torch.Tensor, torch.Tensor,
 torch.Tensor, torch.Tensor]:
     inputs, targets = zip(*batch)
-
     inputs_lengths = torch.tensor([len(seq) for seq in inputs])
     targets_lengths = torch.tensor([len(seq) for seq in targets])
     padded_inputs = pad_sequence(inputs, batch_first=True, padding_value=0)

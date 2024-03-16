@@ -20,12 +20,13 @@
 """
 
 from functools import reduce
-from typing import Tuple
+from typing import Tuple, List
 
 import cv2
-import editdistance
 import numpy as np
 import torch
+from jiwer import wer, cer
+from pyctcdecode import build_ctcdecoder  # noqa
 
 from config import NUMBER_DICT, DIR, LETTER_SIZE
 from dataset import LRNetDataset
@@ -110,8 +111,8 @@ def validate(model: torch.nn.Module, criterion: torch.nn.Module,
             inputs, targets = inputs.to(device), targets.to(device)
             outputs = model(inputs)
             outputs = outputs.permute(1, 0, 2)  # (time, batch, n_class)
-            text_outputs: str = ctc_decode_tensor(outputs)
-            text_targets: str = decode_tensor(targets)
+            text_outputs: List[str] = ctc_decode_tensor(outputs)
+            text_targets: List[str] = decode_tensor(targets)
             val_wer.append(calculate_wer(text_outputs, text_targets))
             val_cer.append(calculate_cer(text_outputs, text_targets))
             loss = criterion(outputs, targets, input_lengths, target_lengths)
@@ -119,13 +120,14 @@ def validate(model: torch.nn.Module, criterion: torch.nn.Module,
             val_loss.append(loss.item())
 
     avg_val_loss, val_wer, val_cer = np.mean(val_loss), np.mean(val_wer), np.mean(val_cer)
-
+    print(f'Validation Loss: {avg_val_loss}, WER: {val_wer}, CER: {val_cer}')
+    print(f'text_outputs: {text_outputs}, text_targets: {text_targets}')
     return avg_val_loss, val_wer, val_cer
 
 
 # decode the tensor to string
 
-def decode_tensor(tensor: torch.Tensor, ) -> str:
+def decode_tensor(tensor: torch.Tensor, ) -> List[str]:
     """
   Decodes a tensor into a string using a mapping dictionary.
     Args:
@@ -135,14 +137,16 @@ def decode_tensor(tensor: torch.Tensor, ) -> str:
         str: The decoded string.
     """
     tensors = tensor.tolist()
-    result = ''
+    result = []
     for tensor in tensors:
-        result += reduce(lambda x, y: x + y, [NUMBER_DICT.get(i, '') if i < LETTER_SIZE + 1 else '' for i in tensor])
+        result.append(reduce(lambda x, y: x + y,
+                             [NUMBER_DICT.get(i, '') if i < LETTER_SIZE + 1
+                              else '' for i in tensor]))
     return result
 
 
 def ctc_decode_tensor(tensor: torch.Tensor,
-                      greedy: bool = True) -> str:
+                      greedy: bool = True, beam_width: int = 10) -> List[str]:
     """
     Decodes a tensor into a string using a mapping dictionary.
     Args:
@@ -156,11 +160,10 @@ def ctc_decode_tensor(tensor: torch.Tensor,
     """
     blank_label = len(NUMBER_DICT) + 1
     if greedy:
-        probabilities = torch.softmax(tensor, dim=-1)  # (time, batch, n_class)
+        # probabilities = torch.log_softmax(tensor, dim=-1)  # (time, batch, n_class)
         decoded_sequences = []
-        for i in range(probabilities.shape[1]):
-            sequence = probabilities[:, i, :].argmax(-1)  # (time, n_class) -> (time,)
-            print(sequence, 'sequence')
+        for i in range(tensor.shape[1]):
+            sequence = tensor[:, i, :].argmax(-1)  # (time, n_class) -> (time,)
             decoded_sequence = ""
             prev_label = None
             for label in sequence:
@@ -169,7 +172,7 @@ def ctc_decode_tensor(tensor: torch.Tensor,
                     decoded_sequence += NUMBER_DICT.get(label.item(), '')
                 prev_label = label
             decoded_sequences.append(decoded_sequence)
-        return ' '.join(decoded_sequences)
+        return decoded_sequences
     else:
         pass
 
@@ -181,25 +184,23 @@ def load_train_test_data(split_ratio: float = 0.8) -> Tuple[torch.utils.data.Sub
     return torch.utils.data.random_split(video_dataset, [train_size, test_size])
 
 
-def calculate_wer(predicted: str, true: str) -> float:
+def calculate_wer(predicted: List[str], true: List[str]) -> float:
     """
 
     :param predicted: str
     :param true: str
     :return: float
     """
-    word_pairs = [(p[0].split(' '), p[1].split(' ')) for p in zip(predicted, true)]
-    wer = [1.0 * editdistance.eval(p[0], p[1]) / len(p[1]) for p in word_pairs]
-    return wer
+    # Create a matrix of zeros
+    return wer(true, predicted)
 
 
 # caculate the cer
-def calculate_cer(predicted: str, true: str) -> float:
+def calculate_cer(predicted: List[str], true: List[str]) -> float:
     """
 
     :param predicted: str
     :param true: str
     :return: float
     """
-    cer = [1.0 * editdistance.eval(p[0], p[1]) / len(p[1]) for p in zip(predicted, true)]
-    return cer
+    return cer(true, predicted)

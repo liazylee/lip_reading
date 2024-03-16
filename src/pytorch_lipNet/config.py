@@ -19,8 +19,8 @@
                   ┗┻┛  ┗┻┛
 """
 
-# DIR = '/home/liazylee/jobs/python/AI/lip_reading/src/lipNet/data/'  # absolute path to the data directory
-DIR = '/Users/zhenyili/research project/src/lipNet/data'  # absolute path to the data directory
+DIR = '/home/liazylee/jobs/python/AI/lip_reading/src/lipNet/data/'  # absolute path to the data directory
+# DIR = '/Users/zhenyili/research project/src/lipNet/data'  # absolute path to the data directory
 LETTER_DICT = {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6,
                'g': 7, 'h': 8, 'i': 9, 'j': 10, 'k': 11, 'l': 12,
                'm': 13, 'n': 14, 'o': 15, 'p': 16, 'q': 17, 'r': 18,
@@ -31,7 +31,7 @@ NUMBER_DICT = {27: ' ', 1: 'a', 2: 'b', 3: 'c', 4: 'd', 5: 'e', 6: 'f',
                13: 'm', 14: 'n', 15: 'o', 16: 'p', 17: 'q', 18: 'r',
                19: 's', 20: 't', 21: 'u', 22: 'v', 23: 'w', 24: 'x', 25: 'y', 26: 'z'}
 LETTER_SIZE = len(LETTER_DICT)
-BATCH_SIZE = 4
-EPOCHS = 10
-LEARNING_RATE = 0.0001
-RANDOM_SEED = 42
+BATCH_SIZE = 1
+EPOCHS = 100
+LEARNING_RATE = 0.001
+RANDOM_SEED = 40

@@ -18,23 +18,27 @@
                   ┃┫┫  ┃┫┫
                   ┗┻┛  ┗┻┛
 """
+import os
+from typing import List
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from tensorboardX import SummaryWriter
-from torch.nn import functional as F
+from torch.nn import functional as F  # noqa
+from tqdm import tqdm
 
-from config import BATCH_SIZE, EPOCHS, LEARNING_RATE, RANDOM_SEED
+from config import BATCH_SIZE, EPOCHS, LEARNING_RATE
 from dataset_loader import LRNetDataLoader
 from model import LRModel
-from utils import validate, decode_tensor, ctc_decode_tensor, load_train_test_data
+from utils import validate, decode_tensor, ctc_decode_tensor, load_train_test_data, calculate_wer, calculate_cer
 
 
 def main():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    torch.manual_seed(RANDOM_SEED)  # Set for testing
-    torch.cuda.manual_seed_all(RANDOM_SEED)
+    # torch.manual_seed(RANDOM_SEED)  # Set for testing
+    # torch.cuda.manual_seed_all(RANDOM_SEED)
     train_dataset, val_dataset = load_train_test_data()
     train_loader = LRNetDataLoader(train_dataset, batch_size=BATCH_SIZE, num_workers=4, shuffle=True)
     val_loader = LRNetDataLoader(val_dataset, batch_size=BATCH_SIZE, num_workers=4, shuffle=True)
@@ -44,44 +48,50 @@ def main():
     criterion = nn.CTCLoss().to(device)
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
-    for epoch in range(EPOCHS):
+    for epoch in range(1, EPOCHS + 1):
         (train_loss_curve, val_loss_curve, train_wer_curve, val_wer_curve,
          train_cer_curve, val_cer_curve) = [], [], [], [], [], []
         print(f'Epoch {epoch}')
         train_loss, train_wer, train_cer = 0, 0, 0
-        for i, (inputs, targets, inputs_lengths, targets_lengths) in enumerate(train_loader):
+        # use tqdm to show the progress
+        for i, (inputs, targets, inputs_lengths, targets_lengths) in enumerate(tqdm(train_loader, desc="Training")):
 
             inputs, targets = inputs.to(device), targets.to(device)
             # torch.Size([4, 3, 75, 70, 140]), torch.Size([4, 28])
             optimizer.zero_grad()
             outputs = model(inputs)  # (batch, time, n_class) # torch.Size([4, 75, 28])
-            outputs = outputs.permute(1, 0, 2)  # (time, batch, n_class)
-            outputs = F.log_softmax(outputs, dim=2)  # (time, batch, n_class)
-            # inputs_lengths = torch.full(size=(outputs.size(1),), fill_value=outputs.size(0),
-            #                             dtype=torch.long).to(device)  # tensor([75, 75, 75, 75])
-            # targets_lengths = torch.full(size=(targets.size(0),), fill_value=targets.size(1),
-            #                              dtype=torch.long).to(device)  # tensor([33, 33, 33, 33])
+            outputs = outputs.transpose(0, 1).contiguous()  # (time, batch, n_class)
+            outputs = F.log_softmax(outputs, dim=-1)  # (time, batch, n_class)
+            # outputs_lengths = torch.full(size=(inputs.size(0),), fill_value=outputs.size(0), dtype=torch.long)
             loss = criterion(outputs, targets, inputs_lengths, targets_lengths)
-            text_outputs: str = ctc_decode_tensor(outputs, )
-            print(f'text_outputs: {text_outputs}')
-            text_targets: str = decode_tensor(targets)
-            print(f'text_targets: {text_targets}')
-            # train_wer += calculate_wer(text_outputs, text_targets)
-            # train_cer += calculate_cer(text_outputs, text_targets)
+            text_outputs: List[str] = ctc_decode_tensor(outputs)
+            text_targets: List[str] = decode_tensor(targets)
+            train_wer_curve.append(calculate_wer(text_outputs, text_targets))
+            train_cer_curve.append(calculate_cer(text_outputs, text_targets))
             loss.backward()
             optimizer.step()
             train_loss += loss.item()
             if i % 10 == 0:
                 writer.add_scalar('train_loss', loss.item(), epoch * len(train_loader) + i)
-                # for name, param in model.named_parameters():
-                #     writer.add_histogram(name, param, epoch * len(train_loader) + i)
-                #     writer.add_histogram(f'{name}.grad', param.grad, epoch * len(train_loader) + i)
-            print(f'Epoch {epoch}, Batch {i}, Loss {loss.item()}')
-        num_batches = len(train_loader)
-        writer.add_scalar('epoch_train_loss', train_loss / num_batches, epoch)
-        writer.add_scalar('epoch_train_wer', train_wer / num_batches, epoch)
-        writer.add_scalar('epoch_train_cer', train_cer / num_batches, epoch)
+                print(f'Epoch {epoch}, Batch {i}, loss: {loss.item()}')
+                print(f'text_outputs: {text_outputs}, text_targets: {text_targets}')
+                print(
+                    f'WER: {calculate_wer(text_outputs, text_targets)}, CER: {calculate_cer(text_outputs, text_targets)}')
+                print(f'acc: {(loss.item() / epoch * BATCH_SIZE)}')
 
+        num_batches = len(train_loader)
+
+        writer.add_scalar('epoch_train_loss', train_loss / num_batches, epoch)
+        writer.add_scalar('epoch_train_wer', np.mean(train_wer_curve), epoch)
+        writer.add_scalar('epoch_train_cer', np.mean(train_cer_curve), epoch)
+        # save model
+        if epoch % 20 == 0:
+            if not os.path.exists('models'):
+                os.makedirs('models')
+            print(f'saving model at epoch {epoch}')
+            torch.save(model.state_dict(), f'./models/model_epoch_{epoch}_'
+                                           f'{round(np.mean(train_wer_curve), 2)}_'
+                                           f'{round((1 - (train_loss / num_batches)), 2)}.pth')
         print(f'begin validation')
         val_loss, val_wer, val_cer = validate(model, criterion, val_loader,
                                               device)  # This function should return validation loss, WER, and CER
@@ -89,6 +99,13 @@ def main():
         writer.add_scalar('val_wer', val_wer, epoch)
         writer.add_scalar('val_cer', val_cer, epoch)
         writer.close()
+
+
+class Solution:
+    def plusOne(self, digits: List[int]) -> List[int]:
+        digits_int = ''.join(map(str, digits))
+        digits_int += 1
+        return list(str(digits_int))
 
 
 if __name__ == '__main__':
