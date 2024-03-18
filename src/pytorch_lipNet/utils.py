@@ -25,10 +25,12 @@ from typing import Tuple, List
 import cv2
 import numpy as np
 import torch
+# from ctcdecode import CTCBeamDecoder  # noqa
 from jiwer import wer, cer
 from pyctcdecode import build_ctcdecoder  # noqa
+from word_beam_search import WordBeamSearch  # noqa
 
-from config import NUMBER_DICT, DIR, LETTER_SIZE
+from config import NUMBER_DICT, DIR, LETTER_SIZE, CORPUS, LETTER_STR
 from dataset import LRNetDataset
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -69,7 +71,7 @@ def mouth_extractor(file_path: str, scale_factor=1.3, min_neighbors=5, mouth_siz
         frames_tensor = np.array(frames)
         mean = np.mean(frames_tensor)
         std = np.std(frames)
-        frames_tensor = (frames - mean) / std
+        frames_tensor = ((frames - mean) / std).astype(np.float16)
         # frames_tensor = np.expand_dims(frames_tensor, axis=-1)
         # Save as npy file
 
@@ -145,36 +147,97 @@ def decode_tensor(tensor: torch.Tensor, ) -> List[str]:
     return result
 
 
-def ctc_decode_tensor(tensor: torch.Tensor,
-                      greedy: bool = True, beam_width: int = 10) -> List[str]:
+# def ctc_decode_tensor(tensor: torch.Tensor,
+#                       greedy: bool = True, beam_width: int = 10) -> List[str]:
+#     """
+#     Decodes a tensor into a string using a mapping dictionary.
+#     Args:
+#         tensor:
+#         input_lengths:
+#         number_dict:
+#         greedy:
+#
+#     Returns: str
+#
+#     """
+#     blank_label = len(NUMBER_DICT) + 1
+#     decoded_sequences = []
+#     if greedy:
+#         # probabilities = torch.log_softmax(tensor, dim=-1)  # (time, batch, n_class)
+#
+#         for i in range(tensor.shape[1]):
+#             sequence = tensor[:, i, :].argmax(-1)  # (time, n_class) -> (time,)
+#             decoded_sequence = ""
+#             prev_label = None
+#             for label in sequence:
+#                 # print(label, type(label), label.item())
+#                 if label != prev_label and label != blank_label:
+#                     decoded_sequence += NUMBER_DICT.get(label.item(), '')
+#                 prev_label = label
+#             decoded_sequences.append(decoded_sequence)
+#         return decoded_sequences
+#     else:
+#         # beam search
+#         probabilities = tensor.log_softmax(dim=-1)
+#         input_lengths = torch.full(size=(tensor.size(1),), fill_value=tensor.size(0), dtype=torch.long)
+#         decoder = build_ctcdecoder(NUMBER_DICT, alpha=0.5, beta=0.5,
+#                                    )
+#         decoded, _ = decoder.decode(probabilities)
+def apply_word_beam_search(mat, corpus, chars, word_chars) -> Tuple[List[str], List[str]]:
+    """Decode using word beam search. Result is tuple, first entry is label string, second entry is char string."""
+    T, B, C = mat.shape
+
+    # decode using the "Words" mode of word beam search with beam width set to 25 and add-k smoothing to 0.0
+    assert len(chars) + 1 == C
+
+    wbs = WordBeamSearch(27, 'Words', 0.0, corpus.encode('utf8'), chars.encode('utf8'), word_chars.encode('utf8'))
+    # convert to numpy array
+    mat_numpy = mat.cpu().detach().numpy()
+    label_str = wbs.compute(mat_numpy)
+
+    # result is string of labels terminated by blank
+    char_str = []
+    for curr_label_str in label_str:
+        s = ''
+        for label in curr_label_str:
+            s += chars[label]  # map label to char
+        char_str.append(s)
+
+    return label_str, char_str
+
+
+def ctc_decode_tensor(tensor: torch.Tensor, greedy: bool = True, beam_width: int = 10) -> List[str]:
     """
     Decodes a tensor into a string using a mapping dictionary.
     Args:
         tensor:
-        input_lengths:
-        number_dict:
         greedy:
-
+        beam_width:
     Returns: str
-
     """
     blank_label = len(NUMBER_DICT) + 1
+    decoded_sequences = []
     if greedy:
-        # probabilities = torch.log_softmax(tensor, dim=-1)  # (time, batch, n_class)
-        decoded_sequences = []
         for i in range(tensor.shape[1]):
             sequence = tensor[:, i, :].argmax(-1)  # (time, n_class) -> (time,)
             decoded_sequence = ""
             prev_label = None
             for label in sequence:
-                # print(label, type(label), label.item())
                 if label != prev_label and label != blank_label:
                     decoded_sequence += NUMBER_DICT.get(label.item(), '')
                 prev_label = label
             decoded_sequences.append(decoded_sequence)
         return decoded_sequences
     else:
-        pass
+        corpus = CORPUS
+        # corpus = 'a ba'  # two words "a" and "ba", separated by whitespace
+        chars = LETTER_STR  # the characters that can be recognized (in this order)
+        word_chars = LETTER_STR[:26]  # characters that form words
+        # RNN output
+        # 3 time-steps and 4 characters per time time ("a", "b", " ", CTC-blank)
+        # initialize word beam search (only do this once in your code)
+        res = apply_word_beam_search(tensor, corpus, chars, word_chars)
+        return res[1]
 
 
 def load_train_test_data(split_ratio: float = 0.8) -> Tuple[torch.utils.data.Subset, torch.utils.data.Subset]:

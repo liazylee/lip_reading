@@ -43,29 +43,38 @@ class LRModel(nn.Module):
         self.relu3 = nn.ReLU()
         self.pool3 = nn.MaxPool3d(kernel_size=(1, 2, 2))
 
+        # New convolutional layer
+        self.conv4 = nn.Conv3d(128, 64, kernel_size=(3, 3, 3), padding=(1, 1, 1))
+        self.relu4 = nn.ReLU()
+        self.pool4 = nn.MaxPool3d(kernel_size=(1, 2, 2))
+
         self.flatten = nn.Flatten(2, 4)
-        self.lstm1 = nn.LSTM(input_size=17408, hidden_size=128, batch_first=True, num_layers=2,
+        self.lstm1 = nn.LSTM(input_size=2048, hidden_size=128, batch_first=True, num_layers=2,
                              bidirectional=True)
         # self.initialize_lstm_forget_gate_bias(self.lstm1)
         self.dropout1 = nn.Dropout(0.5)
-        # self.lstm2 = nn.LSTM(input_size=128 * 2, hidden_size=128, batch_first=True, bidirectional=True)
-        # self.dropout2 = nn.Dropout(0.5)
-        self.fc = nn.Linear(128 * 2, LETTER_SIZE + 1)
+        self.lstm2 = nn.LSTM(input_size=128 * 2, hidden_size=128, batch_first=True, bidirectional=True)
+        self.dropout2 = nn.Dropout(0.5)
+        self.fc = nn.Linear(128 * 2, LETTER_SIZE + 1, )
 
     def forward(self, x):
         x = self.pool1(self.relu1(self.conv1(x)))
         x = self.pool2(self.relu2(self.conv2(x)))
         x = self.pool3(self.relu3(self.conv3(x)))
+        # print(x.shape, 'conv3')
+        x = self.pool4(self.relu4(self.conv4(x)))
+        # print(x.shape, 'conv4')
         # (B, C, T, H, W)->(T, B, C, H, W)
         x = x.permute(2, 0, 1, 3, 4).contiguous()
         # (B, C, T, H, W)->(T, B, C*H*W)
         x = self.flatten(x)
         # print(x.size(), 'flatten')
         x = x.permute(1, 0, 2)
+        # print(x.size(), 'flatten')
         x, _ = self.lstm1(x)
         x = self.dropout1(x)
-        # x, _ = self.lstm2(x)
-        # x = self.dropout2(x)
+        x, _ = self.lstm2(x)
+        x = self.dropout2(x)
         x = self.fc(x)
         return x
 

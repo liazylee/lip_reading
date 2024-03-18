@@ -29,16 +29,16 @@ from tensorboardX import SummaryWriter
 from torch.nn import functional as F  # noqa
 from tqdm import tqdm
 
-from config import BATCH_SIZE, EPOCHS, LEARNING_RATE
+from config import BATCH_SIZE, EPOCHS, LEARNING_RATE, RANDOM_SEED
 from dataset_loader import LRNetDataLoader
 from model import LRModel
-from utils import validate, decode_tensor, ctc_decode_tensor, load_train_test_data, calculate_wer, calculate_cer
+from utils import validate, decode_tensor, load_train_test_data, calculate_wer, calculate_cer, ctc_decode_tensor
 
 
 def main():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    # torch.manual_seed(RANDOM_SEED)  # Set for testing
-    # torch.cuda.manual_seed_all(RANDOM_SEED)
+    torch.manual_seed(RANDOM_SEED)  # Set for testing
+    torch.cuda.manual_seed_all(RANDOM_SEED)
     train_dataset, val_dataset = load_train_test_data()
     train_loader = LRNetDataLoader(train_dataset, batch_size=BATCH_SIZE, num_workers=4, shuffle=True)
     val_loader = LRNetDataLoader(val_dataset, batch_size=BATCH_SIZE, num_workers=4, shuffle=True)
@@ -61,18 +61,18 @@ def main():
             optimizer.zero_grad()
             outputs = model(inputs)  # (batch, time, n_class) # torch.Size([4, 75, 28])
             outputs = outputs.transpose(0, 1).contiguous()  # (time, batch, n_class)
-            outputs = F.log_softmax(outputs, dim=-1)  # (time, batch, n_class)
+            # outputs = F.log_softmax(outputs, dim=2)
             # outputs_lengths = torch.full(size=(inputs.size(0),), fill_value=outputs.size(0), dtype=torch.long)
             loss = criterion(outputs, targets, inputs_lengths, targets_lengths)
-            text_outputs: List[str] = ctc_decode_tensor(outputs)
+            text_outputs: List[str] = ctc_decode_tensor(outputs, greedy=False)
             text_targets: List[str] = decode_tensor(targets)
             train_wer_curve.append(calculate_wer(text_outputs, text_targets))
             train_cer_curve.append(calculate_cer(text_outputs, text_targets))
             loss.backward()
             optimizer.step()
             train_loss += loss.item()
-            if i % 10 == 0:
-                writer.add_scalar('train_loss', loss.item(), epoch * len(train_loader) + i)
+            if i % 20 == 0:
+                writer.add_scalar('train_loss', train_loss, epoch * len(train_loader) + i)
                 print(f'Epoch {epoch}, Batch {i}, loss: {loss.item()}')
                 print(f'text_outputs: {text_outputs}, text_targets: {text_targets}')
                 print(
@@ -99,13 +99,6 @@ def main():
         writer.add_scalar('val_wer', val_wer, epoch)
         writer.add_scalar('val_cer', val_cer, epoch)
         writer.close()
-
-
-class Solution:
-    def plusOne(self, digits: List[int]) -> List[int]:
-        digits_int = ''.join(map(str, digits))
-        digits_int += 1
-        return list(str(digits_int))
 
 
 if __name__ == '__main__':
