@@ -28,10 +28,11 @@ import torch
 # from ctcdecode import CTCBeamDecoder  # noqa
 from jiwer import wer, cer
 from pyctcdecode import build_ctcdecoder  # noqa
-from word_beam_search import WordBeamSearch  # noqa
 
 from config import NUMBER_DICT, DIR, LETTER_SIZE, CORPUS, LETTER_STR
 from dataset import LRNetDataset
+
+# from word_beam_search import WordBeamSearch
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
