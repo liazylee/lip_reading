@@ -34,12 +34,12 @@ NUMBER_DICT = {27: ' ', 1: 'a', 2: 'b', 3: 'c', 4: 'd', 5: 'e', 6: 'f',
 LETTER = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
           'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', ' ']
 LETTER_STR = 'abcdefghijklmnopqrstuvwxyz '
-
+MODEL_PATH = '/home/liazylee/jobs/python/AI/lip_reading/src/pytorch_lipNet/models/model_epoch_60_0.99_0.56.pth'
 LETTER_SIZE = len(LETTER_DICT)
 BATCH_SIZE = 8
 EPOCHS = 60
 LEARNING_RATE = 0.001
-RANDOM_SEED = 10
+RANDOM_SEED = 42
 
 
 def get_corpus() -> str:

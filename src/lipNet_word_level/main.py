@@ -45,7 +45,6 @@ def main():
     writer = SummaryWriter()
     # Load model
     model = LRModel().to(device)
-    torch.backends.cudnn.deterministic = True
     if os.path.exists(MODEL_PATH):
         model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
     criterion = nn.CTCLoss().to(device)
@@ -59,12 +58,13 @@ def main():
         for i, (inputs, targets, inputs_lengths, targets_lengths) in enumerate(tqdm(train_loader, desc="Training")):
 
             inputs, targets = inputs.to(device), targets.to(device)
-            # torch.Size([4, 3, 75, 70, 140]), torch.Size([4, 28])
+            # torch.Size([8, 3, 75, 70, 140]), torch.Size([8, 6])
             optimizer.zero_grad()
-            outputs = model(inputs)  # (batch, time, n_class) # torch.Size([4, 75, 28])
+            outputs = model(inputs)  # (batch, time, n_class) # torch.Size([8, 75, 52])
             outputs = outputs.transpose(0, 1).contiguous()  # (time, batch, n_class)
             outputs = F.log_softmax(outputs, dim=2)
-            loss = criterion(outputs, targets, inputs_lengths.view(-1), targets_lengths.view(-1))
+            # outputs_lengths = torch.full(size=(inputs.size(0),), fill_value=outputs.size(0), dtype=torch.long)
+            loss = criterion(outputs, targets, inputs_lengths, targets_lengths)
             text_outputs: List[str] = ctc_decode_tensor(outputs)
             text_targets: List[str] = decode_tensor(targets)
             train_wer_curve.append(calculate_wer(text_outputs, text_targets))
@@ -72,25 +72,25 @@ def main():
             loss.backward()
             optimizer.step()
             train_loss += loss.item()
-            if i % 20 == 0:
+            if i % 50 == 0:
                 writer.add_scalar('train_loss', train_loss, epoch * len(train_loader) + i)
                 print(f'Epoch {epoch}, Batch {i}, loss: {loss.item()}')
-                print(f'text_outputs: {text_outputs}, \n '
+                print(f'text_outputs: {text_outputs}, \n'
                       f'text_targets: {text_targets}')
                 print(
-                    f'WER: {calculate_wer(text_outputs, text_targets)},\n'
-                    f' CER: {calculate_cer(text_outputs, text_targets)}')
+                    f'WER: {calculate_wer(text_outputs, text_targets)}, CER: {calculate_cer(text_outputs, text_targets)}')
+
         num_batches = len(train_loader)
 
         writer.add_scalar('epoch_train_loss', train_loss / num_batches, epoch)
         writer.add_scalar('epoch_train_wer', np.mean(train_wer_curve), epoch)
         writer.add_scalar('epoch_train_cer', np.mean(train_cer_curve), epoch)
         # save model
-        if epoch % 20 == 0:
+        if epoch % 30 == 0:
             if not os.path.exists('models'):
                 os.makedirs('models')
             print(f'saving model at epoch {epoch}')
-            torch.save(model.state_dict(), f'./models/2_model_epoch_{epoch}_'
+            torch.save(model.state_dict(), f'./models/model_epoch_{epoch}_'
                                            f'{round(np.mean(train_wer_curve), 2)}_'
                                            f'{round(np.mean(train_cer_curve), 2)}.pth')
         print(f'begin validation')

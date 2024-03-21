@@ -27,7 +27,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
-from config import LETTER_DICT
+from config import CORPUS_LETTER
 
 
 class LRNetDataset(Dataset):
@@ -62,8 +62,7 @@ class LRNetDataset(Dataset):
                 line = line.split()
                 if line[2] != 'sil':
                     tokens = tokens + ' ' + line[2]
-            tokens = tokens.strip()
-            tokens_np = np.array([LETTER_DICT.get(c, ' ') for c in tokens])
+            tokens_np = np.array([CORPUS_LETTER.get(x, 52) for x in tokens.strip().split()])
             # padding the tokens
 
             return tokens_np
@@ -75,4 +74,4 @@ class LRNetDataset(Dataset):
         video_frames = np.load(self.video_list[idx])
         alignments = self.alignments.get(self.video_list[idx].split('/')[-1].split('.')[0])
 
-        return torch.from_numpy(video_frames).float(), torch.from_numpy(alignments).float()
+        return torch.from_numpy(video_frames).float(), torch.from_numpy(alignments).int()

@@ -18,7 +18,6 @@
                   ┃┫┫  ┃┫┫
                   ┗┻┛  ┗┻┛
 """
-
 from functools import reduce
 from typing import Tuple, List
 
@@ -28,11 +27,9 @@ import torch
 # from ctcdecode import CTCBeamDecoder  # noqa
 from jiwer import wer, cer
 from pyctcdecode import build_ctcdecoder  # noqa
-from torch import Tensor
-from torch.nn import functional as F
 from word_beam_search import WordBeamSearch  # noqa
 
-from config import NUMBER_DICT, DIR, LETTER_SIZE
+from config import DIR, LETTER_CORPUS, CORPUS_size
 from dataset import LRNetDataset
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -114,8 +111,7 @@ def validate(model: torch.nn.Module, criterion: torch.nn.Module,
         for inputs, targets, input_lengths, target_lengths in val_loader:
             inputs, targets = inputs.to(device), targets.to(device)
             outputs = model(inputs)
-            outputs = outputs.transpose(0, 1).contiguous()  # (time, batch, n_class)
-            outputs = F.log_softmax(outputs, dim=2).detach().requires_grad_(False)
+            outputs = outputs.permute(1, 0, 2)  # (time, batch, n_class)
             text_outputs: List[str] = ctc_decode_tensor(outputs)
             text_targets: List[str] = decode_tensor(targets)
             val_wer.append(calculate_wer(text_outputs, text_targets))
@@ -137,15 +133,15 @@ def decode_tensor(tensor: torch.Tensor, ) -> List[str]:
   Decodes a tensor into a string using a mapping dictionary.
     Args:
         tensor (torch.Tensor): Input tensor of shape (4, 28) containing numerical indices.
-        NUMBER_DICT (dict): Dictionary mapping numerical indices to characters.
+        LETTER_CORPUS (dict): Dictionary mapping numerical indices to characters.
     Returns:
         str: The decoded string.
     """
-    tensors = Tensor.cpu(tensor).detach().numpy()
+    tensors = tensor.tolist()
     result = []
     for tensor in tensors:
-        result.append(reduce(lambda x, y: x + y,
-                             [NUMBER_DICT.get(i, '') if i < LETTER_SIZE + 1
+        result.append(reduce(lambda x, y: x + ' ' + y,
+                             [LETTER_CORPUS.get(i, '') if i < (CORPUS_size + 1)
                               else '' for i in tensor]))
     return result
 
@@ -209,32 +205,49 @@ def apply_word_beam_search(mat, corpus, chars, word_chars) -> Tuple[List[str], L
     return label_str, char_str
 
 
-def ctc_decode_tensor(tensor: torch.Tensor, greedy: bool = True, beam_width: int = 10) -> List[str]:
+def ctc_decode_tensor(tensor: torch.Tensor, greedy: bool = True, ) -> List[str]:
     """
     Decodes a tensor into a string using a mapping dictionary.
     Args:
-        tensor:
+        tensor: (time, batch, n_class)
         greedy:
         beam_width:
     Returns: str
     """
-    blank_label = len(NUMBER_DICT) + 1
-    decoded_sequences = []
+    sequences = []
     if greedy:
         for i in range(tensor.shape[1]):
-            sequence = tensor[:, i, :].argmax(-1)  # (time, n_class) -> (time,)
+            sequences.append(greedy_decoder(tensor[:, i, :]))
+        return sequences
 
-            indices = torch.unique_consecutive(sequence, dim=-1)
-            # print(indices)
-
-            indices = [i for i in indices if i != blank_label]
-            joined = "".join([NUMBER_DICT.get(i.item(), '') for i in indices])
-            decoded_sequences.append(joined)
-        return decoded_sequences
     else:
-        for i in range(tensor.shape[1]):
-            sequence = tensor[:, i, :]  # torch.Size([75, 28])
-            pass
+        # beam search
+        pass
+
+
+class GreedyCTCDecoder(torch.nn.Module):
+    def __init__(self, labels: dict, blank: int = 0) -> None:
+        super().__init__()
+        self.labels = labels
+        self.blank = blank
+
+    def forward(self, emission: torch.Tensor) -> List[str]:
+        """Given a sequence emission over labels, get the best path
+        Args:
+          emission (Tensor): Logit tensors. Shape `[num_seq, num_label]`.
+
+        Returns:
+          List[str]: The resulting transcript
+        """
+        indices = torch.argmax(emission, dim=-1)  # [num_seq,]
+        indices = torch.unique_consecutive(indices, dim=-1)
+        indices = [i for i in indices if i != self.blank]
+        joined = " ".join([self.labels.get(i.item(), '') for i in indices])
+        joined = ' '.join(joined.split())
+        return joined
+
+
+greedy_decoder = GreedyCTCDecoder(LETTER_CORPUS)
 
 
 def load_train_test_data(split_ratio: float = 0.8) -> Tuple[torch.utils.data.Subset, torch.utils.data.Subset]:
