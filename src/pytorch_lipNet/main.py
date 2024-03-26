@@ -46,7 +46,13 @@ def main():
     # Load model
     model = LRModel().to(device)
     torch.backends.cudnn.deterministic = True
+    iter_num = 0
     if os.path.exists(MODEL_PATH):
+        iter_num = MODEL_PATH.split('/')[-1].split('_')[0]
+        if not iter_num.isdigit():
+            iter_num = 0
+        else:
+            iter_num += 1
         model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
     criterion = nn.CTCLoss().to(device)
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
@@ -63,8 +69,8 @@ def main():
             optimizer.zero_grad()
             outputs = model(inputs)  # (batch, time, n_class) # torch.Size([4, 75, 28])
             outputs = outputs.transpose(0, 1).contiguous()  # (time, batch, n_class)
-            outputs = F.log_softmax(outputs, dim=2)
-            loss = criterion(outputs, targets, inputs_lengths.view(-1), targets_lengths.view(-1))
+            outputs = F.log_softmax(outputs, dim=-1)
+            loss = criterion(outputs, targets, inputs_lengths, targets_lengths)
             text_outputs: List[str] = ctc_decode_tensor(outputs)
             text_targets: List[str] = decode_tensor(targets)
             train_wer_curve.append(calculate_wer(text_outputs, text_targets))
@@ -77,6 +83,8 @@ def main():
                 print(f'Epoch {epoch}, Batch {i}, loss: {loss.item()}')
                 print(f'text_outputs: {text_outputs}, \n '
                       f'text_targets: {text_targets}')
+                beam_text_outputs: List[str] = ctc_decode_tensor(outputs, greedy=False)
+                print(f'beam_search_results:{beam_text_outputs}')
                 print(
                     f'WER: {calculate_wer(text_outputs, text_targets)},\n'
                     f' CER: {calculate_cer(text_outputs, text_targets)}')
@@ -90,7 +98,8 @@ def main():
             if not os.path.exists('models'):
                 os.makedirs('models')
             print(f'saving model at epoch {epoch}')
-            torch.save(model.state_dict(), f'./models/2_model_epoch_{epoch}_'
+
+            torch.save(model.state_dict(), f'./models/{iter_num}_model_epoch_{epoch}_'
                                            f'{round(np.mean(train_wer_curve), 2)}_'
                                            f'{round(np.mean(train_cer_curve), 2)}.pth')
         print(f'begin validation')

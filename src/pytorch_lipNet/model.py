@@ -55,7 +55,7 @@ class LRModel(nn.Module):
         self.dropout1 = nn.Dropout(0.5)
         self.lstm2 = nn.LSTM(input_size=128 * 2, hidden_size=128, batch_first=True, bidirectional=True)
         self.dropout2 = nn.Dropout(0.5)
-        self.fc = nn.Linear(128 * 2, LETTER_SIZE + 1, )
+        self.fc = nn.Linear(128 * 2, LETTER_SIZE)
 
     def forward(self, x):
         x = self.pool1(self.relu1(self.conv1(x)))

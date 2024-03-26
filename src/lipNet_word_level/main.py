@@ -45,7 +45,10 @@ def main():
     writer = SummaryWriter()
     # Load model
     model = LRModel().to(device)
+    iter_num = 0
     if os.path.exists(MODEL_PATH):
+        iter_num = int(MODEL_PATH.split('/')[-1].split('_')[0])
+        iter_num += 1
         model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
     criterion = nn.CTCLoss().to(device)
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
@@ -61,8 +64,8 @@ def main():
             # torch.Size([8, 3, 75, 70, 140]), torch.Size([8, 6])
             optimizer.zero_grad()
             outputs = model(inputs)  # (batch, time, n_class) # torch.Size([8, 75, 52])
-            outputs = outputs.transpose(0, 1).contiguous()  # (time, batch, n_class)
-            outputs = F.log_softmax(outputs, dim=2)
+            # outputs = outputs.transpose(0, 1).contiguous()  # (time, batch, n_class)
+            outputs = F.log_softmax(outputs, dim=-1)
             # outputs_lengths = torch.full(size=(inputs.size(0),), fill_value=outputs.size(0), dtype=torch.long)
             loss = criterion(outputs, targets, inputs_lengths, targets_lengths)
             text_outputs: List[str] = ctc_decode_tensor(outputs)
@@ -72,7 +75,7 @@ def main():
             loss.backward()
             optimizer.step()
             train_loss += loss.item()
-            if i % 50 == 0:
+            if i % 10 == 0:
                 writer.add_scalar('train_loss', train_loss, epoch * len(train_loader) + i)
                 print(f'Epoch {epoch}, Batch {i}, loss: {loss.item()}')
                 print(f'text_outputs: {text_outputs}, \n'
@@ -90,7 +93,7 @@ def main():
             if not os.path.exists('models'):
                 os.makedirs('models')
             print(f'saving model at epoch {epoch}')
-            torch.save(model.state_dict(), f'./models/model_epoch_{epoch}_'
+            torch.save(model.state_dict(), f'./models/{iter_num}_model_epoch_{epoch}_'
                                            f'{round(np.mean(train_wer_curve), 2)}_'
                                            f'{round(np.mean(train_cer_curve), 2)}.pth')
         print(f'begin validation')

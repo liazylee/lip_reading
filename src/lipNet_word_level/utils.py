@@ -24,13 +24,15 @@ from typing import Tuple, List
 import cv2
 import numpy as np
 import torch
-# from ctcdecode import CTCBeamDecoder  # noqa
+from ctcdecode import CTCBeamDecoder  # noqa
 from jiwer import wer, cer
-from pyctcdecode import build_ctcdecoder  # noqa
-from word_beam_search import WordBeamSearch  # noqa
+# from pyctcdecode import build_ctcdecoder  # noqa
+from torch.nn import functional as F  # noqa
 
-from config import DIR, LETTER_CORPUS, CORPUS_size
+from config import DIR, LETTER_CORPUS, CORPUS_size, LETTER
 from dataset import LRNetDataset
+
+# from word_beam_search import WordBeamSearch  # noqa
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
@@ -112,6 +114,7 @@ def validate(model: torch.nn.Module, criterion: torch.nn.Module,
             inputs, targets = inputs.to(device), targets.to(device)
             outputs = model(inputs)
             outputs = outputs.permute(1, 0, 2)  # (time, batch, n_class)
+            outputs = F.log_softmax(outputs, dim=2).detach().requires_grad_(False)
             text_outputs: List[str] = ctc_decode_tensor(outputs)
             text_targets: List[str] = decode_tensor(targets)
             val_wer.append(calculate_wer(text_outputs, text_targets))
@@ -121,7 +124,7 @@ def validate(model: torch.nn.Module, criterion: torch.nn.Module,
             val_loss.append(loss.item())
 
     avg_val_loss, val_wer, val_cer = np.mean(val_loss), np.mean(val_wer), np.mean(val_cer)
-    print(f'Validation Loss: {avg_val_loss}, WER: {val_wer}, CER: {val_cer}')
+    print(f'Validation Loss: {avg_val_loss},\n WER: {val_wer},\n CER: {val_cer} \n')
     print(f'text_outputs: {text_outputs}, text_targets: {text_targets}')
     return avg_val_loss, val_wer, val_cer
 
@@ -142,46 +145,10 @@ def decode_tensor(tensor: torch.Tensor, ) -> List[str]:
     for tensor in tensors:
         result.append(reduce(lambda x, y: x + ' ' + y,
                              [LETTER_CORPUS.get(i, '') if i < (CORPUS_size + 1)
-                              else '' for i in tensor]))
+                              else '' for i in tensor]).strip())
     return result
 
 
-# def ctc_decode_tensor(tensor: torch.Tensor,
-#                       greedy: bool = True, beam_width: int = 10) -> List[str]:
-#     """
-#     Decodes a tensor into a string using a mapping dictionary.
-#     Args:
-#         tensor:
-#         input_lengths:
-#         number_dict:
-#         greedy:
-#
-#     Returns: str
-#
-#     """
-#     blank_label = len(NUMBER_DICT) + 1
-#     decoded_sequences = []
-#     if greedy:
-#         # probabilities = torch.log_softmax(tensor, dim=-1)  # (time, batch, n_class)
-#
-#         for i in range(tensor.shape[1]):
-#             sequence = tensor[:, i, :].argmax(-1)  # (time, n_class) -> (time,)
-#             decoded_sequence = ""
-#             prev_label = None
-#             for label in sequence:
-#                 # print(label, type(label), label.item())
-#                 if label != prev_label and label != blank_label:
-#                     decoded_sequence += NUMBER_DICT.get(label.item(), '')
-#                 prev_label = label
-#             decoded_sequences.append(decoded_sequence)
-#         return decoded_sequences
-#     else:
-#         # beam search
-#         probabilities = tensor.log_softmax(dim=-1)
-#         input_lengths = torch.full(size=(tensor.size(1),), fill_value=tensor.size(0), dtype=torch.long)
-#         decoder = build_ctcdecoder(NUMBER_DICT, alpha=0.5, beta=0.5,
-#                                    )
-#         decoded, _ = decoder.decode(probabilities)
 def apply_word_beam_search(mat, corpus, chars, word_chars) -> Tuple[List[str], List[str]]:
     """Decode using word beam search. Result is tuple, first entry is label string, second entry is char string."""
     T, B, C = mat.shape
@@ -205,7 +172,7 @@ def apply_word_beam_search(mat, corpus, chars, word_chars) -> Tuple[List[str], L
     return label_str, char_str
 
 
-def ctc_decode_tensor(tensor: torch.Tensor, greedy: bool = True, ) -> List[str]:
+def ctc_decode_tensor(tensor: torch.Tensor, greedy: bool = True, beam_width: int = 100) -> List[str]:
     """
     Decodes a tensor into a string using a mapping dictionary.
     Args:
@@ -214,15 +181,29 @@ def ctc_decode_tensor(tensor: torch.Tensor, greedy: bool = True, ) -> List[str]:
         beam_width:
     Returns: str
     """
-    sequences = []
+    blank_label = 0
+    decoded_sequences = []
     if greedy:
         for i in range(tensor.shape[1]):
-            sequences.append(greedy_decoder(tensor[:, i, :]))
-        return sequences
-
+            sequence = tensor[:, i, :].argmax(-1)  # (time, n_class) -> (time,)
+            indices = torch.unique_consecutive(sequence, dim=-1)
+            indices = [i for i in indices if i != blank_label]
+            joined = " ".join([LETTER_CORPUS.get(i.item(), '') for i in indices]).strip()
+            joined = ' '.join(joined.strip().split())
+            decoded_sequences.append(joined)
+        return decoded_sequences
     else:
-        # beam search
-        pass
+        tensor = tensor.permute(1, 0, 2)
+        # batch x num_timesteps x num_labels.
+        decoder = CTCBeamDecoder(LETTER, beam_width=beam_width)
+        outputs, *args = decoder.decode(tensor)
+        for output in outputs:
+            indices = torch.unique_consecutive(output[0], dim=-1)
+            indices = [i for i in indices if i != blank_label]
+            joined = " ".join([LETTER_CORPUS.get(i.item(), '') for i in indices]).strip()
+            joined = ' '.join(joined.strip().split())
+            decoded_sequences.append(joined)
+        return decoded_sequences
 
 
 class GreedyCTCDecoder(torch.nn.Module):
@@ -231,7 +212,7 @@ class GreedyCTCDecoder(torch.nn.Module):
         self.labels = labels
         self.blank = blank
 
-    def forward(self, emission: torch.Tensor) -> List[str]:
+    def forward(self, emission: torch.Tensor) -> str:
         """Given a sequence emission over labels, get the best path
         Args:
           emission (Tensor): Logit tensors. Shape `[num_seq, num_label]`.
@@ -243,7 +224,7 @@ class GreedyCTCDecoder(torch.nn.Module):
         indices = torch.unique_consecutive(indices, dim=-1)
         indices = [i for i in indices if i != self.blank]
         joined = " ".join([self.labels.get(i.item(), '') for i in indices])
-        joined = ' '.join(joined.split())
+        joined = ' '.join(joined.strip().split())
         return joined
 
 

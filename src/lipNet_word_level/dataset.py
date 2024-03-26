@@ -57,14 +57,12 @@ class LRNetDataset(Dataset):
     def load_alignments(self, path: str) -> np.array:
         with open(path, 'r') as f:
             lines = f.readlines()
-            tokens = ''
+            tokens = []
             for line in lines:
                 line = line.split()
                 if line[2] != 'sil':
-                    tokens = tokens + ' ' + line[2]
-            tokens_np = np.array([CORPUS_LETTER.get(x, 52) for x in tokens.strip().split()])
-            # padding the tokens
-
+                    tokens.append(line[2])
+            tokens_np = np.array([CORPUS_LETTER.get(token, 0) for token in tokens])
             return tokens_np
 
     def __len__(self):
