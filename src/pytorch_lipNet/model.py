@@ -76,6 +76,9 @@ class LRModel(nn.Module):
         x, _ = self.lstm2(x)
         x = self.dropout2(x)
         x = self.fc(x)
+        # log_softmax is used to normalize the output
+        x = x.transpose(0, 1).contiguous()
+        x = torch.log_softmax(x, dim=-1)
         return x
 
     # def initialize_lstm_forget_gate_bias(self, lstm):

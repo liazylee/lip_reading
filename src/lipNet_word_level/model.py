@@ -78,17 +78,6 @@ class LRModel(nn.Module):
         x = self.fc(x)
         return x
 
-    # def initialize_lstm_forget_gate_bias(self, lstm):
-    #     """
-    #     Initialize the bias for the forget gate in the LSTM cell
-    #     """
-    #     for names in lstm._all_weights:
-    #         for name in filter(lambda n: "bias" in n, names):
-    #             bias = getattr(lstm, name)
-    #             n = bias.size(0)
-    #             start, end = n // 4, n // 2
-    #             bias.data[start:end].fill_(1.0)  # Initialize the forget gate bias to 1.0
-
 
 if __name__ == '__main__':
     model = LRModel()

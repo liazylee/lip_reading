@@ -62,21 +62,25 @@ def main():
          train_cer_curve, val_cer_curve) = [], [], [], [], [], []
         print(f'Epoch {epoch}')
         train_loss, train_wer, train_cer = 0, 0, 0
-        for i, (inputs, targets, inputs_lengths, targets_lengths) in enumerate(tqdm(train_loader, desc="Training")):
+        for i, (inputs, targets, inputs_lengths, targets_lengths) in enumerate(tqdm(train_loader, leave=False,
+                                                                                    desc="Train", ncols=75)):
 
-            inputs, targets = inputs.to(device), targets.to(device)
+            inputs, targets = (inputs.float()).to(device), (targets.int()).to(device)
+            inputs_lengths, targets_lengths = (inputs_lengths.int()).to(device), (targets_lengths.int()).to(device)
             # torch.Size([4, 3, 75, 70, 140]), torch.Size([4, 28])
             optimizer.zero_grad()
+            model.train()
             outputs = model(inputs)  # (batch, time, n_class) # torch.Size([4, 75, 28])
-            outputs = outputs.transpose(0, 1).contiguous()  # (time, batch, n_class)
-            outputs = F.log_softmax(outputs, dim=-1)
-            loss = criterion(outputs, targets, inputs_lengths, targets_lengths)
+            # outputs = outputs.transpose(0, 1).contiguous()  # (time, batch, n_class)
+            # outputs = F.log_softmax(outputs, dim=-1)
+            with torch.backends.cudnn.flags():
+                loss = criterion(outputs, targets, inputs_lengths, targets_lengths)
+            loss.backward()
+            optimizer.step()
             text_outputs: List[str] = ctc_decode_tensor(outputs)
             text_targets: List[str] = decode_tensor(targets)
             train_wer_curve.append(calculate_wer(text_outputs, text_targets))
             train_cer_curve.append(calculate_cer(text_outputs, text_targets))
-            loss.backward()
-            optimizer.step()
             train_loss += loss.item()
             if i % 20 == 0:
                 writer.add_scalar('train_loss', train_loss, epoch * len(train_loader) + i)

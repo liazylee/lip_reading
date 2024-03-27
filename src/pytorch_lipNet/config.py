@@ -40,14 +40,3 @@ BATCH_SIZE = 8
 EPOCHS = 60
 LEARNING_RATE = 0.01
 RANDOM_SEED = 42
-
-
-def get_corpus() -> str:
-    CORPUS = ''
-    with open('text.txt', 'r') as f:
-        for line in f:
-            CORPUS += line
-    return CORPUS
-
-
-CORPUS = get_corpus()
