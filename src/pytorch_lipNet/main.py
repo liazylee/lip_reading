@@ -52,7 +52,7 @@ def main():
         if not iter_num.isdigit():
             iter_num = 0
         else:
-            iter_num += 1
+            iter_num = int(iter_num) + 1
         model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
     criterion = nn.CTCLoss().to(device)
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)

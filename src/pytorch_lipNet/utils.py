@@ -25,12 +25,11 @@ from typing import Tuple, List
 import cv2
 import numpy as np
 import torch
-# from ctcdecode import CTCBeamDecoder  # noqa
+from ctcdecode import CTCBeamDecoder  # noqa
 from jiwer import wer, cer
 from torch import Tensor
-from torch.nn import functional as F
 
-from config import NUMBER_DICT, DIR
+from config import NUMBER_DICT, DIR, LETTER
 from dataset import LRNetDataset
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -112,10 +111,11 @@ def validate(model: torch.nn.Module, criterion: torch.nn.Module,
         for inputs, targets, input_lengths, target_lengths in val_loader:
             inputs, targets = inputs.to(device), targets.to(device)
             outputs = model(inputs)
-            outputs = outputs.transpose(0, 1).contiguous()  # (time, batch, n_class)
-            outputs = F.log_softmax(outputs, dim=2).detach().requires_grad_(False)
+            # outputs = outputs.transpose(0, 1).contiguous()  # (time, batch, n_class)
+            # outputs = F.log_softmax(outputs, dim=2).detach()
             text_outputs: List[str] = ctc_decode_tensor(outputs)
             text_targets: List[str] = decode_tensor(targets)
+
             val_wer.append(calculate_wer(text_outputs, text_targets))
             val_cer.append(calculate_cer(text_outputs, text_targets))
             loss = criterion(outputs, targets, input_lengths, target_lengths)
@@ -168,16 +168,18 @@ def ctc_decode_tensor(tensor: torch.Tensor, greedy: bool = True, beam_width: int
             decoded_sequences.append(joined)
         return decoded_sequences
     else:
-        # tensor = tensor.permute(1, 0, 2)
-        # # batch x num_timesteps x num_labels.
-        # decoder = CTCBeamDecoder(LETTER, log_probs_input=True, beam_width=beam_width, )
-        # outputs, *args = decoder.decode(tensor)
-        # for output in outputs:
-        #     # print(output)
-        #     indices = torch.unique_consecutive(output[0], dim=-1)
-        #     indices = [i for i in indices if i != blank_label]
-        #     joined = "".join([NUMBER_DICT.get(i.item(), '') for i in indices])
-        #     decoded_sequences.append(joined)
+        tensor = tensor.permute(1, 0, 2)
+        # batch x num_timesteps x num_labels.
+        decoder = CTCBeamDecoder(LETTER, log_probs_input=True, beam_width=beam_width, )
+        outputs, *args = decoder.decode(tensor)
+        for output in outputs:
+            # print(output)
+            for i in range(len(output[:3])):
+                indices = torch.unique_consecutive(output[i], dim=-1)
+                indices = [i for i in indices if i != blank_label]
+                joined = "".join([NUMBER_DICT.get(i.item(), '') for i in indices])
+                print(joined)
+            decoded_sequences.append(joined)
         return decoded_sequences
 
 

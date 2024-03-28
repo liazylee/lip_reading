@@ -63,7 +63,7 @@ class LRNetDataset(Dataset):
                 if line[2] != 'sil':
                     tokens = tokens + ' ' + line[2]
             tokens = tokens.strip()
-            tokens_np = np.array([LETTER_DICT.get(c, ' ') for c in tokens])
+            tokens_np = np.array([LETTER_DICT.get(c, 0) for c in tokens])
             # padding the tokens
 
             return tokens_np
