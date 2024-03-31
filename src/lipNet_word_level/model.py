@@ -49,13 +49,13 @@ class LRModel(nn.Module):
         # self.pool4 = nn.MaxPool3d(kernel_size=(1, 2, 2))
 
         self.flatten = nn.Flatten(2, 4)
-        # self.lstm1 = nn.LSTM(input_size=2048, hidden_size=128, batch_first=True,
-        #                      bidirectional=True)
-        # self.initialize_lstm_forget_gate_bias(self.lstm1)
+        self.lstm1 = nn.LSTM(input_size=2048, hidden_size=128, batch_first=True,
+                             bidirectional=True)
+        self.initialize_lstm_forget_gate_bias(self.lstm1)
         self.dropout1 = nn.Dropout(0.5)
-        # self.lstm2 = nn.LSTM(input_size=128 * 2, hidden_size=128, batch_first=True, bidirectional=True)
-        # self.dropout2 = nn.Dropout(0.5)
-        self.fc = nn.Linear(8704, CORPUS_size)
+        self.lstm2 = nn.LSTM(input_size=128 * 2, hidden_size=128, batch_first=True, bidirectional=True)
+        self.dropout2 = nn.Dropout(0.5)
+        self.fc = nn.Linear(128 * 2, CORPUS_size)
 
     def forward(self, x):
         x = self.pool1(self.relu1(self.conv1(x)))

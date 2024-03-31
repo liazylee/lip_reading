@@ -45,9 +45,9 @@ def main():
     writer = SummaryWriter()
     # Load model
     model = LRModel().to(device)
-    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.deterministic = True  # Set for testing
     iter_num = 0
-    if os.path.exists(MODEL_PATH):
+    if MODEL_PATH and os.path.exists(MODEL_PATH):
         iter_num = MODEL_PATH.split('/')[-1].split('_')[0]
         if not iter_num.isdigit():
             iter_num = 0
@@ -56,7 +56,6 @@ def main():
         model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
     criterion = nn.CTCLoss().to(device)
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
-
     for epoch in range(1, EPOCHS + 1):
         (train_loss_curve, val_loss_curve, train_wer_curve, val_wer_curve,
          train_cer_curve, val_cer_curve) = [], [], [], [], [], []
@@ -67,12 +66,9 @@ def main():
 
             inputs, targets = (inputs.float()).to(device), (targets.int()).to(device)
             inputs_lengths, targets_lengths = (inputs_lengths.int()).to(device), (targets_lengths.int()).to(device)
-            # torch.Size([4, 3, 75, 70, 140]), torch.Size([4, 28])
             optimizer.zero_grad()
             model.train()
-            outputs = model(inputs)  # (batch, time, n_class) # torch.Size([4, 75, 28])
-            # outputs = outputs.transpose(0, 1).contiguous()  # (time, batch, n_class)
-            # outputs = F.log_softmax(outputs, dim=-1)
+            outputs = model(inputs)
             with torch.backends.cudnn.flags():
                 loss = criterion(outputs, targets, inputs_lengths, targets_lengths)
             loss.backward()
@@ -87,16 +83,14 @@ def main():
                 print(f'Epoch {epoch}, Batch {i}, loss: {loss.item()}')
                 print(f'text_outputs: {text_outputs}, \n '
                       f'text_targets: {text_targets}')
-                beam_text_outputs: List[str] = ctc_decode_tensor(outputs, greedy=False)
-                print(f'beam_search_results:{beam_text_outputs}')
                 print(
                     f'WER: {calculate_wer(text_outputs, text_targets)},\n'
                     f' CER: {calculate_cer(text_outputs, text_targets)}')
-        num_batches = len(train_loader)
+        train_loss_curve.append(train_loss)
+        writer.add_scalar('train_loss', train_loss, epoch)
+        writer.add_scalar('train_wer', np.mean(train_wer_curve), epoch)
+        writer.add_scalar('train_cer', np.mean(train_cer_curve), epoch)
 
-        writer.add_scalar('epoch_train_loss', train_loss / num_batches, epoch)
-        writer.add_scalar('epoch_train_wer', np.mean(train_wer_curve), epoch)
-        writer.add_scalar('epoch_train_cer', np.mean(train_cer_curve), epoch)
         # save model
         if epoch % 20 == 0:
             if not os.path.exists('models'):

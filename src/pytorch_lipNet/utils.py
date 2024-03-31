@@ -25,17 +25,17 @@ from typing import Tuple, List
 import cv2
 import numpy as np
 import torch
-from ctcdecode import CTCBeamDecoder  # noqa
+# from ctcdecode import CTCBeamDecoder  # noqa
 from jiwer import wer, cer
 from torch import Tensor
 
-from config import NUMBER_DICT, DIR, LETTER
+from config import NUMBER_DICT, DIR, LETTER, MOUTH_W, MOUTH_H
 from dataset import LRNetDataset
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 
-def mouth_extractor(file_path: str, scale_factor=1.3, min_neighbors=5, mouth_size=(140, 70)) -> None:
+def mouth_extractor(file_path: str, scale_factor=1.3, min_neighbors=5, mouth_size=(MOUTH_W, MOUTH_H)) -> None:
     """
     Extract the mouth from the video and save as an npy file
     :param file_path: Path to the video file
@@ -50,28 +50,28 @@ def mouth_extractor(file_path: str, scale_factor=1.3, min_neighbors=5, mouth_siz
         cap = cv2.VideoCapture(file_path)
         if not cap.isOpened():
             raise Exception("Error: Could not open video.")
-
         frames = []
-        for _ in range(int(cap.get(cv2.CAP_PROP_FRAME_COUNT))):
-            ret, frame = cap.read()
-            if not ret:
-                raise Exception("Error: Could not read frame.")
-            # 参数分别为低阈值和高阈值
-            faces = face_cascade.detectMultiScale(frame, scale_factor, min_neighbors)
-            for (x, y, w, h) in faces:
-                mouth_roi = frame[y + int(h / 2):y + h, x:x + w, :]
+        for i in range(int(cap.get(cv2.CAP_PROP_FRAME_COUNT))):
+            if i & 1 == 0:
+                ret, frame = cap.read()
+                if not ret:
+                    raise Exception("Error: Could not read frame.")
+                # Convert the frame to grayscale
+                faces = face_cascade.detectMultiScale(frame, scale_factor, min_neighbors)
+                for (x, y, w, h) in faces:
+                    mouth_roi = frame[y + int(h / 2):y + h, x:x + w, :]
 
-                mouth_roi = cv2.resize(mouth_roi, mouth_size)
-                frames.append(mouth_roi)
-
+                    mouth_roi = cv2.resize(mouth_roi, mouth_size)
+                    frames.append(mouth_roi)
         cap.release()
 
         # Normalize frames
-        frames_tensor = np.array(frames)
-        mean = np.mean(frames_tensor)
-        std = np.std(frames)
-        frames_tensor = ((frames - mean) / std).astype(np.float16)
-        # frames_tensor = np.expand_dims(frames_tensor, axis=-1)
+        frames_tensor = np.array(frames, dtype=np.float32) / 255.0  # Make sure to scale values to 0-1 range
+        # ImageNet mean and std
+        mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
+        std = np.array([0.229, 0.224, 0.225], dtype=np.float32)
+        # Normalize frames
+        frames_tensor = (frames_tensor - mean) / std  # Broadcasting subtraction and division
         # Save as npy file
 
         np.save(base_path + '.npy', frames_tensor)
@@ -110,9 +110,9 @@ def validate(model: torch.nn.Module, criterion: torch.nn.Module,
     with torch.no_grad():  # Disable gradient calculation during validation
         for inputs, targets, input_lengths, target_lengths in val_loader:
             inputs, targets = inputs.to(device), targets.to(device)
+            model.eval()
             outputs = model(inputs)
-            # outputs = outputs.transpose(0, 1).contiguous()  # (time, batch, n_class)
-            # outputs = F.log_softmax(outputs, dim=2).detach()
+
             text_outputs: List[str] = ctc_decode_tensor(outputs)
             text_targets: List[str] = decode_tensor(targets)
 
@@ -157,7 +157,7 @@ def ctc_decode_tensor(tensor: torch.Tensor, greedy: bool = True, beam_width: int
         beam_width:
     Returns: str
     """
-    blank_label = 0
+    blank_label = 28
     decoded_sequences = []
     if greedy:
         for i in range(tensor.shape[1]):

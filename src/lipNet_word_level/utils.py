@@ -29,7 +29,7 @@ from jiwer import wer, cer
 # from pyctcdecode import build_ctcdecoder  # noqa
 from torch.nn import functional as F  # noqa
 
-from config import DIR, LETTER_CORPUS, CORPUS_size, LETTER
+from config import DIR, LETTER_CORPUS, CORPUS_size, LETTER, MOUTH_W, MOUTH_H
 from dataset import LRNetDataset
 
 # from word_beam_search import WordBeamSearch  # noqa
@@ -37,7 +37,7 @@ from dataset import LRNetDataset
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 
-def mouth_extractor(file_path: str, scale_factor=1.3, min_neighbors=5, mouth_size=(140, 70)) -> None:
+def mouth_extractor(file_path: str, scale_factor=1.3, min_neighbors=5, mouth_size=(MOUTH_W, MOUTH_H)) -> None:
     """
     Extract the mouth from the video and save as an npy file
     :param file_path: Path to the video file
@@ -58,7 +58,7 @@ def mouth_extractor(file_path: str, scale_factor=1.3, min_neighbors=5, mouth_siz
             ret, frame = cap.read()
             if not ret:
                 raise Exception("Error: Could not read frame.")
-            # 参数分别为低阈值和高阈值
+            # Convert the frame to grayscale
             faces = face_cascade.detectMultiScale(frame, scale_factor, min_neighbors)
             for (x, y, w, h) in faces:
                 mouth_roi = frame[y + int(h / 2):y + h, x:x + w, :]
