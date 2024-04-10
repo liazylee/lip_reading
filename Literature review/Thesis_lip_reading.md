@@ -28,7 +28,7 @@ Lip-reading can be typically followed by this framework:
 2. backend: classify the visual features into words.
 
 For an automated lip-reading system, the process are illustrated in Figure 1.1.
-![speech_process.png](..%2Fimages%2Farchitectures%2Fspeech_process.png)
+![speech_process.png](..%2Fimages%2Farchitectures%2Fspeech_process.png)  
 figure 1.1: The process of an automated lip-reading system.
 
 # Test and Evaluation
