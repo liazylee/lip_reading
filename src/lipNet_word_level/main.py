@@ -60,21 +60,19 @@ def main():
         train_loss, train_wer, train_cer = 0, 0, 0
         for i, (inputs, targets, inputs_lengths, targets_lengths) in enumerate(tqdm(train_loader, desc="Training")):
 
-            inputs, targets = inputs.to(device), targets.to(device)
-            # torch.Size([8, 3, 75, 70, 140]), torch.Size([8, 6])
+            inputs, targets = (inputs.float()).to(device), (targets.int()).to(device)
+            # inputs_lengths, targets_lengths = (inputs_lengths.int()).to(device), (targets_lengths.int()).to(device)
             optimizer.zero_grad()
-            outputs = model(inputs)  # (batch, time, n_class) # torch.Size([8, 75, 52])
-            # outputs = outputs.transpose(0, 1).contiguous()  # (time, batch, n_class)
-            outputs = F.log_softmax(outputs, dim=-1)
-            # outputs_lengths = torch.full(size=(inputs.size(0),), fill_value=outputs.size(0), dtype=torch.long)
+            model.train()
+            outputs = model(inputs)
             loss = criterion(outputs, targets, inputs_lengths, targets_lengths)
+            loss.backward()
+            optimizer.step()
+            train_loss += loss.item()
             text_outputs: List[str] = ctc_decode_tensor(outputs)
             text_targets: List[str] = decode_tensor(targets)
             train_wer_curve.append(calculate_wer(text_outputs, text_targets))
             train_cer_curve.append(calculate_cer(text_outputs, text_targets))
-            loss.backward()
-            optimizer.step()
-            train_loss += loss.item()
             if i % 10 == 0:
                 writer.add_scalar('train_loss', train_loss, epoch * len(train_loader) + i)
                 print(f'Epoch {epoch}, Batch {i}, loss: {loss.item()}')

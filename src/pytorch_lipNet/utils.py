@@ -50,30 +50,33 @@ def mouth_extractor(file_path: str, scale_factor=1.3, min_neighbors=5, mouth_siz
         cap = cv2.VideoCapture(file_path)
         if not cap.isOpened():
             raise Exception("Error: Could not open video.")
+
         frames = []
-        for i in range(int(cap.get(cv2.CAP_PROP_FRAME_COUNT))):
-            if i & 1 == 0:
-                ret, frame = cap.read()
-                if not ret:
-                    raise Exception("Error: Could not read frame.")
-                # Convert the frame to grayscale
-                faces = face_cascade.detectMultiScale(frame, scale_factor, min_neighbors)
-                for (x, y, w, h) in faces:
-                    mouth_roi = frame[y + int(h / 2):y + h, x:x + w, :]
-
-                    mouth_roi = cv2.resize(mouth_roi, mouth_size)
-                    frames.append(mouth_roi)
+        for _ in range(int(cap.get(cv2.CAP_PROP_FRAME_COUNT))):
+            ret, frame = cap.read()
+            if not ret:
+                raise Exception("Error: Could not read frame.")
+            # Convert to grayscale
+            faces = face_cascade.detectMultiScale(frame, scale_factor, min_neighbors)
+            if len(faces) == 0:
+                print(f'Error: No face detected in {file_path}')
+                continue
+            for (x, y, w, h) in faces:
+                mouth_roi = frame[y + int(h / 2):y + h, x:x + w]
+                mouth_roi = cv2.resize(mouth_roi, mouth_size)
+                mouth_roi = cv2.cvtColor(mouth_roi, cv2.COLOR_BGR2GRAY)
+                frames.append(mouth_roi)
         cap.release()
-
+        if len(frames) < 62:
+            print(f'Error: {file_path} has less than 62 frames,rather drop out', len(frames))
+            return
         # Normalize frames
-        frames_tensor = np.array(frames, dtype=np.float32) / 255.0  # Make sure to scale values to 0-1 range
-        # ImageNet mean and std
-        mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
-        std = np.array([0.229, 0.224, 0.225], dtype=np.float32)
+        frames_tensor = np.array(frames, dtype=np.float32)
+        mean = np.mean(frames_tensor)
+        std = np.std(frames_tensor)
         # Normalize frames
         frames_tensor = (frames_tensor - mean) / std  # Broadcasting subtraction and division
         # Save as npy file
-
         np.save(base_path + '.npy', frames_tensor)
         return frames_tensor
     else:
@@ -112,10 +115,8 @@ def validate(model: torch.nn.Module, criterion: torch.nn.Module,
             inputs, targets = inputs.to(device), targets.to(device)
             model.eval()
             outputs = model(inputs)
-
             text_outputs: List[str] = ctc_decode_tensor(outputs)
             text_targets: List[str] = decode_tensor(targets)
-
             val_wer.append(calculate_wer(text_outputs, text_targets))
             val_cer.append(calculate_cer(text_outputs, text_targets))
             loss = criterion(outputs, targets, input_lengths, target_lengths)
@@ -157,7 +158,7 @@ def ctc_decode_tensor(tensor: torch.Tensor, greedy: bool = True, beam_width: int
         beam_width:
     Returns: str
     """
-    blank_label = 28
+    blank_label = 29
     decoded_sequences = []
     if greedy:
         for i in range(tensor.shape[1]):

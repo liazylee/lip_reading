@@ -56,6 +56,7 @@ def main():
         model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
     criterion = nn.CTCLoss().to(device)
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    best_wer = 0.95
     for epoch in range(1, EPOCHS + 1):
         (train_loss_curve, val_loss_curve, train_wer_curve, val_wer_curve,
          train_cer_curve, val_cer_curve) = [], [], [], [], [], []
@@ -71,6 +72,7 @@ def main():
             outputs = model(inputs)
             with torch.backends.cudnn.flags():
                 loss = criterion(outputs, targets, inputs_lengths, targets_lengths)
+
             loss.backward()
             optimizer.step()
             text_outputs: List[str] = ctc_decode_tensor(outputs)
@@ -78,7 +80,7 @@ def main():
             train_wer_curve.append(calculate_wer(text_outputs, text_targets))
             train_cer_curve.append(calculate_cer(text_outputs, text_targets))
             train_loss += loss.item()
-            if i % 20 == 0:
+            if i % (80 + epoch) == 0:
                 writer.add_scalar('train_loss', train_loss, epoch * len(train_loader) + i)
                 print(f'Epoch {epoch}, Batch {i}, loss: {loss.item()}')
                 print(f'text_outputs: {text_outputs}, \n '
@@ -90,13 +92,14 @@ def main():
         writer.add_scalar('train_loss', train_loss, epoch)
         writer.add_scalar('train_wer', np.mean(train_wer_curve), epoch)
         writer.add_scalar('train_cer', np.mean(train_cer_curve), epoch)
-
         # save model
-        if epoch % 20 == 0:
-            if not os.path.exists('models'):
-                os.makedirs('models')
-            print(f'saving model at epoch {epoch}')
 
+        if np.mean(train_wer_curve) < (best_wer - 0.5):
+            best_wer = np.mean(train_wer_curve)
+            torch.save(model.state_dict(), f'./models/{iter_num}_model_epoch_{epoch}_'
+                                           f'{round(np.mean(train_wer_curve), 2)}_'
+                                           f'{round(np.mean(train_cer_curve), 2)}.pth')
+        if epoch % 60 == 0:
             torch.save(model.state_dict(), f'./models/{iter_num}_model_epoch_{epoch}_'
                                            f'{round(np.mean(train_wer_curve), 2)}_'
                                            f'{round(np.mean(train_cer_curve), 2)}.pth')

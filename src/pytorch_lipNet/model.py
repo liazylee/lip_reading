@@ -32,17 +32,17 @@ class LRModel(nn.Module):
     def __init__(self):
         super(LRModel, self).__init__()
         # 128 filters, 3x3 kernel, 1x1 padding
-        self.conv1 = nn.Conv3d(3, 128, kernel_size=(3, 3, 3), padding=(1, 1, 1))
+        self.conv1 = nn.Conv3d(1, 128, kernel_size=(3, 3, 3), padding=(1, 1, 1))
         self.relu1 = nn.ReLU()
-        self.pool1 = nn.MaxPool3d(kernel_size=(1, 2, 2))
+        self.pool1 = nn.AvgPool3d(kernel_size=(1, 2, 2))
 
         self.conv2 = nn.Conv3d(128, 256, kernel_size=(3, 3, 3), padding=(1, 1, 1))
         self.relu2 = nn.ReLU()
-        self.pool2 = nn.MaxPool3d(kernel_size=(1, 2, 2))
+        self.pool2 = nn.AvgPool3d(kernel_size=(1, 2, 2))
 
         self.conv3 = nn.Conv3d(256, 75, kernel_size=(3, 3, 3), padding=(1, 1, 1))
         self.relu3 = nn.ReLU()
-        self.pool3 = nn.MaxPool3d(kernel_size=(1, 2, 2))
+        self.pool3 = nn.AvgPool3d(kernel_size=(1, 2, 2))
 
         # New convolutional layer
         self.flatten = nn.Flatten(2, 4)
@@ -83,4 +83,4 @@ if __name__ == '__main__':
     model.to(device)
     print(model)
     # print(model.lstm1)
-    print(summary(model, input_size=(2, 3, 75, 70, 140)))
+    print(summary(model, input_size=(2, 1, 75, 70, 140)))

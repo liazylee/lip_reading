@@ -3,7 +3,7 @@ from typing import Tuple, Dict
 DIR = '/home/liazylee/jobs/python/AI/lip_reading/src/lipNet/data/'  # absolute path to the data directory
 # DIR = '/Users/zhenyili/research project/src/lipNet/data'  # absolute path to the data directory
 MODEL_PATH = ''
-BATCH_SIZE = 8
+BATCH_SIZE = 4
 EPOCHS = 60
 LEARNING_RATE = 0.001
 RANDOM_SEED = 42
@@ -46,15 +46,6 @@ LETTER_CORPUS = {1: 'p', 2: 'q', 3: 'f', 4: 'x', 5: 's', 6: 'p', 7: 'h', 8: 'a',
                  41: 'place', 42: 'two', 43: 'k', 44: 'v', 45: 'o', 46: 'l',
                  47: 'd', 48: 'red', 49: 'i', 50: 'again', 51: 'y', 52: 'by', 53: 'bin', }
 
-LETTER = ['p', 'q', 'f', 'x', 's', 'h', 'a',
-          'now', 'six', 'u', 'at', 'set', 'n',
-          'with', 'zero', 'three', 'five', 'nine',
-          'lay', 'in', 'soon', 'green', 'please',
-          'r', 'seven', 'z', 't', 'white', 'g',
-          'eight', 'b', 'four', 'one', 'blue',
-          'c', 'e', 'j', 'm', 'place', 'two', 'k',
-          'v', 'o', 'l', 'd', 'red', 'i', 'again',
-          'y', 'by', 'bin']
-CORPUS_size = len(LETTER)
+CORPUS_size = len(CORPUS_LETTER) + 1
 MOUTH_H = 35
 MOUTH_W = 70

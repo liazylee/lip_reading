@@ -24,12 +24,12 @@ from typing import Tuple, List
 import cv2
 import numpy as np
 import torch
-from ctcdecode import CTCBeamDecoder  # noqa
+# from ctcdecode import CTCBeamDecoder  # noqa
 from jiwer import wer, cer
 # from pyctcdecode import build_ctcdecoder  # noqa
 from torch.nn import functional as F  # noqa
 
-from config import DIR, LETTER_CORPUS, CORPUS_size, LETTER, MOUTH_W, MOUTH_H
+from config import DIR, LETTER_CORPUS, CORPUS_size, MOUTH_W, MOUTH_H
 from dataset import LRNetDataset
 
 # from word_beam_search import WordBeamSearch  # noqa
@@ -144,7 +144,7 @@ def decode_tensor(tensor: torch.Tensor, ) -> List[str]:
     result = []
     for tensor in tensors:
         result.append(reduce(lambda x, y: x + ' ' + y,
-                             [LETTER_CORPUS.get(i, '') if i < (CORPUS_size + 1)
+                             [LETTER_CORPUS.get(i, '') if i < CORPUS_size
                               else '' for i in tensor]).strip())
     return result
 
