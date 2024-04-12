@@ -19,8 +19,12 @@ def load_video(path: str) -> List[float]:
     frames = []
     for _ in range(int(cap.get(cv2.CAP_PROP_FRAME_COUNT))):
         ret, frame = cap.read()
+        frame = frame[180:250, 100:220, :]
+        frame = cv2.resize(frame, [140, 70])
         frame = tf.image.rgb_to_grayscale(frame)
-        frames.append(frame[190:236, 80:220, :])
+        frames.append(frame)
+        # frame = tf.image.rgb_to_grayscale(frame)
+        # frames.append(frame[190:236, 80:220, :])
     cap.release()
 
     mean = tf.math.reduce_mean(frames)

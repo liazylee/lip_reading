@@ -9,7 +9,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 
 
 def load_model() -> Sequential:
-    base_model = ResNet50(weights=None, include_top=False, input_shape=(46, 140, 3))
+    base_model = ResNet50(weights=None, include_top=False, input_shape=(70, 140, 1))
 
     # If you wish to Freeze layers
     for layer in base_model.layers:
@@ -20,7 +20,7 @@ def load_model() -> Sequential:
     model = Sequential()
     # Add a 3D convolutional layer with 128 filters, a kernel size of (3, 3, 3), and input shape of (75, 46, 140, 1)
     # The 'padding' parameter is set to 'same' to ensure that the spatial dimensions of the output remain the same as the input.
-    model.add(Conv3D(128, 3, input_shape=(75, 46, 140, 1), padding='same'))
+    model.add(Conv3D(128, 3, input_shape=(75, 70, 140, 1), padding='same'))
     # Add a ReLU activation function to introduce non-linearity after the convolutional layer.
     model.add(Activation('relu'))
     # Add a 3D max pooling layer with a pool size of (1, 2, 2)
@@ -45,6 +45,6 @@ def load_model() -> Sequential:
 
     model.add(Dense(29, kernel_initializer='he_normal', activation='softmax'))
 
-    model.load_weights(os.path.join('..', 'models_4', 'checkpoint'))
+    model.load_weights(os.path.join('..', 'models', 'lip_reading_baseline_140*70.h5'))
 
     return model

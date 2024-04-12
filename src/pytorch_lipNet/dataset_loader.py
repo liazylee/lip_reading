@@ -41,7 +41,6 @@ torch.Tensor, torch.Tensor]:
     padded_inputs = pad_sequence(inputs, batch_first=True, padding_value=0)
     # (batch, channel, time, height, width) -> (batch, time, channel, height, width)
     # (batch,time,height,width)->add 1 channel dimension (batch, time, channel, height, width)
-    padded_inputs = padded_inputs.unsqueeze(2)
-    padded_inputs = padded_inputs.permute(0, 2, 1, 3, 4)
+    padded_inputs = padded_inputs.permute(0, 4, 1, 2, 3)
     padded_targets = pad_sequence(targets, batch_first=True, padding_value=0)
     return padded_inputs, padded_targets, inputs_lengths, targets_lengths
