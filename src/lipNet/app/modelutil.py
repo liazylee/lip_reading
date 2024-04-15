@@ -45,6 +45,6 @@ def load_model() -> Sequential:
 
     model.add(Dense(29, kernel_initializer='he_normal', activation='softmax'))
 
-    model.load_weights(os.path.join('..', 'models', 'lip_reading_baseline_140*70.h5'))
+    model.load_weights(os.path.join('..', 'models', 'lip_reading_baseline_140*70_wer-0.0033.h5'))
 
     return model
