@@ -69,7 +69,7 @@ class LRNetDataset(Dataset):
             return tokens_np
 
     def __len__(self):
-        return len(self.video_list)
+        return len(self.video_list[:100])
 
     def __getitem__(self, idx) -> Tuple[torch.Tensor, torch.Tensor]:
         video_frames = np.load(self.video_list[idx])

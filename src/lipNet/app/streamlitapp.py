@@ -48,11 +48,14 @@ if process_button:
     align = os.path.join('..', 'data', 'alignments', 's1', f'{selected_video_name}.align')
     # Convert prediction to text
     converted_prediction = tf.strings.reduce_join(num_to_char(decoder)).numpy().decode('utf-8')
+    align = ''.join(load_alignments_text(align))
     st.info(converted_prediction)
     # accuracy use 余弦值相似度计算
     accuracy = cosine_similarity(converted_prediction.strip(), align.strip())
+    print(converted_prediction.strip(), align.strip(), 111111111111111111111111111111)
     cer = cer(align.strip(), converted_prediction.strip())
     wer = wer(align.strip(), converted_prediction.strip())
+    # print(cer, wer)
     with col1:
         st.info('The video below displays the converted video in mp4 format')
         file_path = os.path.join('..', 'data', 's1', selected_video)
@@ -60,37 +63,37 @@ if process_button:
         align = os.path.join('..', 'data', 'alignments', 's1', f'{selected_video_name}.align')
         os.system(f'ffmpeg -i {file_path} -vcodec libx264 test_video.mp4 -y')  # convert to mp4
         st.info('loading the video...')
-        os.system(f'ffmpeg -i test_video.mp4 -vcodec libx264 -acodec aac -strict -2 test_video_fixed.mp4 -y')
-        cap = cv2.VideoCapture('test_video_fixed.mp4')
+        # os.system(f'ffmpeg -i test_video.mp4 -vcodec libx264 -acodec aac -strict -2 test_video_fixed.mp4 -y')
+        # cap = cv2.VideoCapture('test_video_fixed.mp4')
 
         # Rendering inside of the app
         # video = open('test_video.mp4', 'rb')
-        fps = int(cap.get(cv2.CAP_PROP_FPS))
-        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        out = cv2.VideoWriter('test_video.mp4', fourcc, fps, (width, height))
+        # fps = int(cap.get(cv2.CAP_PROP_FPS))
+        # width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        # height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        # fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        # out = cv2.VideoWriter('test_video.mp4', fourcc, fps, (width, height))
 
-        while cap.isOpened():
-            ret, frame = cap.read()
-            if ret:
-                font = cv2.FONT_HERSHEY_SIMPLEX
-                text = converted_prediction.strip()
-                textsize = cv2.getTextSize(text, font, 1, 2)[0]
-                textX = (frame.shape[1] - textsize[0]) // 2
-                textY = frame.shape[0] - 10
-                cv2.putText(frame, text, (textX, textY), font, 3, (255, 255, 255), 3, cv2.LINE_AA)
-
-                dynamic_text = f"Frame: {int(cap.get(cv2.CAP_PROP_POS_FRAMES))}"
-                cv2.putText(frame, dynamic_text, (10, 30), font, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
-
-                out.write(frame)
-            else:
-                break
-
-        # 释放资源
-        cap.release()
-        out.release()
+        # while cap.isOpened():
+        #     ret, frame = cap.read()
+        #     if ret:
+        #         font = cv2.FONT_HERSHEY_SIMPLEX
+        #         text = converted_prediction.strip()
+        #         textsize = cv2.getTextSize(text, font, 1, 2)[0]
+        #         textX = (frame.shape[1] - textsize[0]) // 2
+        #         textY = frame.shape[0] - 10
+        #         cv2.putText(frame, text, (textX, textY), font, 3, (255, 255, 255), 3, cv2.LINE_AA)
+        #
+        #         dynamic_text = f"Frame: {int(cap.get(cv2.CAP_PROP_POS_FRAMES))}"
+        #         cv2.putText(frame, dynamic_text, (10, 30), font, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+        #
+        #         out.write(frame)
+        #     else:
+        #         break
+        #
+        # # 释放资源
+        # cap.release()
+        # out.release()
         video = open('test_video.mp4', 'rb')
         video_bytes = video.read()
         st.video(video_bytes)
@@ -106,8 +109,8 @@ if process_button:
         st.text(decoder)
         st.info('Decode the raw tokens into words')
         st.info(converted_prediction)
-        st.info(f'cer : {round(cer, 5) * 100} %')
-        st.info(f'wer : {round(wer, 5) * 100} %')
+        st.info(f'cer : {round(cer, 5)} ')
+        st.info(f'wer : {round(wer, 5)} ')
         st.info(f'accuracy : {round(accuracy, 5) * 100} %')
 
 if record_button:

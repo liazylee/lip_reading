@@ -1,165 +1,187 @@
 ## Abstract:
-In the wake of transformative advancements in deep learning methodologies and 
-the proliferation of extensive datasets, the field of Visual Speech Recognition 
-(VSR) has experienced a paradigm shift. Originally conceived to augment the 
-accuracy of Audio Speech Recognition systems, VSR has evolved into a multifaceted 
-technology with diverse applications, including biometric identification and the 
-realization of silent speech interfaces. This paper conducts a thorough survey of 
-contemporary deep learning-based VSR research, emphasizing critical facets of data 
-challenges, task-specific intricacies, and innovative solutions. Noteworthy datasets 
-instrumental to VSR advancements are explored, including the VoxCeleb dataset 
-(Nagrani et al., 2020) and the GRID dataset (Cooke et al., 2006). The analysis
-extends to the constituent modules of a VSR pipeline, drawing on seminal works
-such as the LipNet architecture by Assael et al. (2016). Furthermore, practical
-considerations for deploying VSR systems in real-world scenarios are examined, 
-referencing insights from recent studies (e.g., Chung & Zisserman, 2017). The paper
-concludes by delineating prevalent concerns and challenges, providing a foundation 
-for future research directions. Through this comprehensive exploration, the aim is 
-to not only inform current practitioners but also inspire future investigations in 
-the dynamic realm of deep learning-based Visual Speech Recognition.
+
+In this investigation, we examined the impact of image resolution on the performance of lip-reading models, with a focus
+on character error rate (CER) and word error rate (WER) as primary metrics. Two models were rigorously trained, one at a
+low resolution of 35x70 pixels and the other at a higher resolution of 70x140 pixels.The dataset we are using is one of
+the grid corpus datasets, which is a widely used dataset in the field of lip reading. The results were telling: the
+high-resolution model achieved a CER of 0.0008 and a WER of 0.0033, in contrast to the low-resolution model's CER of
+0.3034 and WER of 0.3015. This indicates a significant performance leap with higher resolution inputs. However, the
+trade-off for precision was computational time, with the higher resolution training taking 4.319 hours, compared to
+1.212 hours for the lower resolution. To translate these findings into practical insights, we have developed an online
+platform where users can gauge the model's accuracy in real-time scenarios. The direct comparison of CER and WER across
+resolutions highlights the delicate balance between model accuracy and computational efficiency in the field of
+automated lip-reading.
+
 ## Introduction:
-The evolution of Visual Speech Recognition (VSR) has been spurred by the synergy of deep learning methodologies
-and the proliferation of high-quality audio-visual speech datasets. While speech perception has traditionally been 
-regarded as an auditory process, it is increasingly acknowledged that visual cues significantly enhance speech 
-understanding (McGurk, 1976; Sumby & Pollack, 1954). The McGurk effect, a phenomenon that highlights the influence
-of visual information on speech perception, underscores the importance of considering visual data in communication. 
-This is particularly crucial for individuals who are deaf or hard of hearing, where visual cues become a vital means of 
-nonverbal communication (Summerfield, 1992). While sign language is a prevalent method in the deaf community, 
-lip reading serves as an alternative, enabling individuals to compensate for the lack of audio information, 
-comprehend speech, and integrate seamlessly into the hearing world.  
 
-The applications of lip reading extend beyond addressing auditory challenges. Its utility is evident in diverse 
-real-world scenarios, including biometric identification, visual password systems, silent speech interfaces, 
-multi-modal verification, forensic video analysis, and assisting law enforcement with CCTV footage analysis 
-(Assael et al., 2016; Chung & Zisserman, 2017; Nagrani et al., 2020). Furthermore, lip reading has emerged as 
-a complementary signal to enhance the accuracy of Audio-based Speech Recognition (ASR) systems. The resurgence 
-of interest in automatic lip reading systems can be attributed to recent advances in deep learning methods and 
-the exponential growth in both the quantity and quality of audio-visual speech datasets.   
+Lip reading is a complex visual task that involves deciphering speech from the movements of the lips, tongue, and face
+without auditory input. It is particularly critical for those with hearing impairments and has extensive applications in
+noisy environments where audio signals may be compromised. The advent of deep learning has significantly enhanced the
+prospects of automating this task, but achieving high accuracy depends on multiple factors including the resolution of
+the input data.
 
-The main objective of this paper is to present a comprehensive survey of contemporary lip reading methods, 
-leveraging the recent strides in deep learning and the enriched landscape of audio-visual datasets. Unlike  
-existing surveys that have only partially covered related topics (Chung & Zisserman, 2016; Assael et al., 2016; 
-Wand et al., 2020; Petridis et al., 2018; Zhou et al., 2019), this survey adopts a critical perspective,
-elucidating challenges and impediments unique to lip reading. The major contributions of this paper to the 
-existing literature in the field can be summarized as follows:
+In this paper, we investigate the influence of input resolution on the performance of a lip-reading model that
+integrates three-dimensional convolutional neural networks (Conv3D), Long Short-Term Memory networks (LSTM), and
+Connectionist Temporal Classification (CTC) for training. This combination leverages spatial feature extraction through
+Conv3D, temporal dynamics captured by LSTM, and an end-to-end training approach offered by CTC, which is well-suited for
+sequence prediction problems such as lip reading.
 
-### Dataset Analysis:   
+Our study compares the character error rate (CER) and word error rate (WER) of two models: one trained on
+low-resolution (35x70 pixels) and the other on high-resolution (70x140 pixels) datasets. These metrics gauge the models'
+abilities to accurately recognize and reproduce characters and words from visual information alone. By presenting a
+side-by-side analysis of models trained with varying input resolutions, we aim to illuminate the trade-offs between
+computational efficiency and the precision of lip-reading models. Furthermore, the paper discusses the implementation of
+an online platform to assess the practical capabilities of the trained models in real-world scenarios.
+
+## Experimental Setup:
+
+## Results:
+
+## Conclusion:
+
+We trained two models on the grid corpus dataset, one at a low resolution of 35x70 pixels and the other at a higher
+resolution of 70x140 pixels. each model was trained for 100 epochs, with a batch size of 4 and a learning rate of
+0.0001.
+The high-resolution model achieved a significantly lower CER of 0.0008 and WER of 0.0033, compared to the low-resolution
+model's CER of 0.3034 and WER of 0.3015. as shown in the table below, the high-resolution model outperformed the
+low-resolution
+model across all metrics, indicating the importance of input resolution in lip-reading tasks.
+
+### Dataset Analysis:
 
 We review datasets that have received substantial attention, delineating their characteristics and exploring
-dataset-related challenges. Additionally, we examine solutions presented in the retrospective literature and 
+dataset-related challenges. Additionally, we examine solutions presented in the retrospective literature and
 survey metrics used for evaluating VSR systems.
 
 ### Feature Extraction:
 
-We analyze the feature extraction process, focusing on the input preparation and feature extraction modules. 
+We analyze the feature extraction process, focusing on the input preparation and feature extraction modules.
 We discuss the challenges associated with these modules and the techniques used to address them.
 
-###  VSR Pipeline Scrutiny:  
+### VSR Pipeline Scrutiny:
 
-For each sub-module of the VSR pipeline, we analyze obstacles hindering progress and system accuracy. 
+For each sub-module of the VSR pipeline, we analyze obstacles hindering progress and system accuracy.
 We explore how current methods address and alleviate these challenges.
 
-### Future Directions:  
+### Future Directions:
 
 A detailed overview of open problems and potential future directions in the field of lip reading is presented.
-
 
 ## Lip Reading Workflow:
 
 generally, lip reading is the process of inferring speech from visual information. In other words, lip reading learns
-from video, i.e., series of images/frames, and predicts the corresponding speech. The process of lip reading can 
+from video, i.e., series of images/frames, and predicts the corresponding speech. The process of lip reading can
 be divided into two main steps: feature extraction and classification.
-The feature extraction step is responsible for extracting the most relevant information from the video frames. 
-The classification step is responsible for predicting the corresponding speech from the extracted features. 
-The following figures shows the general lip reading pipeline. 
+The feature extraction step is responsible for extracting the most relevant information from the video frames.
+The classification step is responsible for predicting the corresponding speech from the extracted features.
+The following figures shows the general lip reading pipeline.
 ![img.png](../images/process_of_lip_reading.png)
 
 ![img_1.png](../images/flows_process.png)
 
-All lip reading  always come  with data collection first,which is the very first step in "Input Video" in the above figure.
-And then, we need to do some preprocessing to extract the features like face detection ,face alignment, and mouth extraction.
-After that, it comes to the most important step, matching the features with the corresponding speech. which is called Region-of-Interest
-(ROI).The ROI is the part of the image that contains the mouth. The ROI is then fed to the feature extraction module, which extracts
-the most relevant information from the ROI. The extracted features are then fed to the classification module, which predicts the
+All lip reading always come with data collection first,which is the very first step in "Input Video" in the above
+figure.
+And then, we need to do some preprocessing to extract the features like face detection ,face alignment, and mouth
+extraction.
+After that, it comes to the most important step, matching the features with the corresponding speech. which is called
+Region-of-Interest
+(ROI).The ROI is the part of the image that contains the mouth. The ROI is then fed to the feature extraction module,
+which extracts
+the most relevant information from the ROI. The extracted features are then fed to the classification module, which
+predicts the
 corresponding speech. Simply, this step is aligning a sequence of images with a sequence of words.
 
-when we get aligned images and words, we can train a model to predict the corresponding words from the images. During this part, luckily,
-we get lots of models to choose from, like CNN, RNN, LSTM, 3D CNN, residual networks, HPC,2D DenseNet, 3DMM,GANs,BANNs,Reinfoecement learning,
-P3D,MIM,SpotFast,Deformation Flow, and so on. The richness of model options underscores the flexibility in choosing an architecture tailored 
-to specific requirements, a topic that will be expounded upon later in this discussion. Once aligned images and corresponding words are obtained, model training ensues
-. A plethora of models allows for a nuanced approach, accommodating various complexities inherent in lip reading.Following training, we can test the model with the test set.
-The test set is the part of the dataset that the model has not seen during training. The test set is used to evaluate the performance of the model. The performance of the model is
-measured using metrics like accuracy, word error rate, and sentence error rate. The accuracy is the percentage of correctly predicted words.
-The word error rate is the percentage of words that are incorrectly predicted. The sentence error rate is the percentage of sentences that
-are incorrectly predicted. The higher the accuracy, the better the model. The lower the word error rate, the better the model. The lower
-the sentence error rate, the better the model. 
+when we get aligned images and words, we can train a model to predict the corresponding words from the images. During
+this part, luckily,
+we get lots of models to choose from, like CNN, RNN, LSTM, 3D CNN, residual networks, HPC,2D DenseNet,
+3DMM,GANs,BANNs,Reinfoecement learning,
+P3D,MIM,SpotFast,Deformation Flow, and so on. The richness of model options underscores the flexibility in choosing an
+architecture tailored
+to specific requirements, a topic that will be expounded upon later in this discussion. Once aligned images and
+corresponding words are obtained, model training ensues
+. A plethora of models allows for a nuanced approach, accommodating various complexities inherent in lip
+reading.Following training, we can test the model with the test set.
+The test set is the part of the dataset that the model has not seen during training. The test set is used to evaluate
+the performance of the model. The performance of the model is
+measured using metrics like accuracy, word error rate, and sentence error rate. The accuracy is the percentage of
+correctly predicted words.
+The word error rate is the percentage of words that are incorrectly predicted. The sentence error rate is the percentage
+of sentences that
+are incorrectly predicted. The higher the accuracy, the better the model. The lower the word error rate, the better the
+model. The lower
+the sentence error rate, the better the model.
 
+### Data Collection:
 
-
-### Data Collection:  
-The initial step is the collection of a substantial dataset comprising videos with corresponding transcriptions 
-(Assael et al., 2016; Nagrani et al., 2020). It is imperative for this dataset to be diverse, encompassing 
+The initial step is the collection of a substantial dataset comprising videos with corresponding transcriptions
+(Assael et al., 2016; Nagrani et al., 2020). It is imperative for this dataset to be diverse, encompassing
 variations in speakers, lighting conditions, and other pertinent variables. This diversity ensures the model's
 adaptability to real-world scenarios and enhances its generalization capabilities.
 
-### Preprocessing:  
-Following data collection, preprocessing is employed to isolate the speaker's mouth region, recognizing it as the 
+### Preprocessing:
+
+Following data collection, preprocessing is employed to isolate the speaker's mouth region, recognizing it as the
 primary focal point for lip reading (Chung & Zisserman, 2016; Assael et al., 2016). This step involves the extraction
 of relevant visual information, facilitating a focused analysis on the crucial articulatory movements during speech.
 
-### Feature Extraction:  
+### Feature Extraction:
+
 The heart of the lip reading process lies in feature extraction. Artificial Intelligence (AI) algorithms are employed
-to analyze a sequence of image frames derived from silent talking videos (Wand et al., 2020). Visual and temporal 
-features are extracted, capturing the nuances of lip and facial movements that convey speech-related information. 
+to analyze a sequence of image frames derived from silent talking videos (Wand et al., 2020). Visual and temporal
+features are extracted, capturing the nuances of lip and facial movements that convey speech-related information.
 This step is pivotal for providing the subsequent model with rich input for accurate analysis.
 
-### Model Training:  
-With the extracted features in hand, a deep learning model is trained to decipher the sequential patterns 
-inherent in lip movements (Petridis et al., 2018; Zhou et al., 2019). This model may comprise a 
+### Model Training:
+
+With the extracted features in hand, a deep learning model is trained to decipher the sequential patterns
+inherent in lip movements (Petridis et al., 2018; Zhou et al., 2019). This model may comprise a
 Convolutional Neural Network (CNN) for image recognition, coupled with a Recurrent Neural Network (RNN)
-like Long Short-Term Memory (LSTM) for sequence prediction. The training process involves mapping the 
-sequence of features to meaningful speech units, such as characters, words, or phrases. The model 
-learns to recognize and interpret the visual and temporal cues inherent in the lip movements, 
+like Long Short-Term Memory (LSTM) for sequence prediction. The training process involves mapping the
+sequence of features to meaningful speech units, such as characters, words, or phrases. The model
+learns to recognize and interpret the visual and temporal cues inherent in the lip movements,
 enabling it to make predictions based on the learned patterns.
 
-### Evaluation and Testing:  
-Once the model is trained, it undergoes evaluation on a distinct test set of videos that it has not encountered 
+### Evaluation and Testing:
+
+Once the model is trained, it undergoes evaluation on a distinct test set of videos that it has not encountered
 during training (Chung & Zisserman, 2016; Assael et al., 2016). This rigorous evaluation process assesses the
-model's ability to generalize its lip reading capabilities to new and unseen data. The predictions made by the 
-model are compared with the actual words spoken in the videos to measure its accuracy. This step is essential 
+model's ability to generalize its lip reading capabilities to new and unseen data. The predictions made by the
+model are compared with the actual words spoken in the videos to measure its accuracy. This step is essential
 for validating the model's efficacy and ensuring its reliability in practical applications.
 
 The culmination of these processes represents a comprehensive approach to lip reading, leveraging deep learning
-techniques to bridge the gap between visual information extracted from silent talking videos and meaningful 
-speech understanding. The dynamic interplay between data collection, preprocessing, feature extraction, model 
-training, and evaluation converges to form a sophisticated system capable of decoding spoken language solely 
-through visual cues. As advancements in technology and datasets continue, the potential for even more accurate 
+techniques to bridge the gap between visual information extracted from silent talking videos and meaningful
+speech understanding. The dynamic interplay between data collection, preprocessing, feature extraction, model
+training, and evaluation converges to form a sophisticated system capable of decoding spoken language solely
+through visual cues. As advancements in technology and datasets continue, the potential for even more accurate
 and versatile lip reading systems becomes increasingly promising.
-
-
 
 ## Datasets and Performance Evaluation:
 
-
-
-## Automatic Lip Reading: 
-
+## Automatic Lip Reading:
 
 ## Future Directions:
 
-
 ## Conclusions:
- 
+
 ## References:
 
-* Assael, Y. M., Shillingford, B., Whiteson, S., & de Freitas, N. (2016). LipNet: End-to-End Sentence-level Lipreading. arXiv preprint arXiv:1611.01599.
-* Chung, J. S., & Zisserman, A. (2017). Lip Reading in the Wild. In Asian Conference on Computer Vision (pp. 87-104). Springer.
-* Chung, J. S., & Zisserman, A. (2016). Lip Reading Sentences in the Wild. In Asian Conference on Computer Vision (pp. 87-103). Springer.
+* Assael, Y. M., Shillingford, B., Whiteson, S., & de Freitas, N. (2016). LipNet: End-to-End Sentence-level Lipreading.
+  arXiv preprint arXiv:1611.01599.
+* Chung, J. S., & Zisserman, A. (2017). Lip Reading in the Wild. In Asian Conference on Computer Vision (pp. 87-104).
+  Springer.
+* Chung, J. S., & Zisserman, A. (2016). Lip Reading Sentences in the Wild. In Asian Conference on Computer Vision (pp.
+  87-103). Springer.
 * McGurk, H., & MacDonald, J. (1976). Hearing lips and seeing voices. Nature, 264(5588), 746-748.
-* Petridis, S., Stavropoulos, G., Bastiaan Kleijn, W., & Cirstea, C. (2018). End-to-end audiovisual speech recognition. IEEE Transactions on Neural Networks and Learning Systems, 29(12), 6261-6270.
-* Summerfield, Q. (1992). Lipreading and audio-visual speech perception. Philosophical Transactions of the Royal Society of London. Series B: Biological Sciences, 335(1273), 71-78.
-* Sumby, W. H., & Pollack, I. (1954). Visual contribution to speech intelligibility in noise. The Journal of the Acoustical Society of America, 26(2), 212-215.
-* Cooke, M., Barker, J., Cunningham, S., & Shao, X. (2006). An audio-visual corpus for speech perception and automatic speech recognition. The Journal of the Acoustical Society of America, 120(5), 2421-2424.
-* Nagrani, A., Chung, J. S., & Zisserman, A. (2020). VoxCeleb: A large-scale speaker identification dataset. In ICASSP 2020-2020 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP) (pp. 3084-3088). IEEE.
+* Petridis, S., Stavropoulos, G., Bastiaan Kleijn, W., & Cirstea, C. (2018). End-to-end audiovisual speech recognition.
+  IEEE Transactions on Neural Networks and Learning Systems, 29(12), 6261-6270.
+* Summerfield, Q. (1992). Lipreading and audio-visual speech perception. Philosophical Transactions of the Royal Society
+  of London. Series B: Biological Sciences, 335(1273), 71-78.
+* Sumby, W. H., & Pollack, I. (1954). Visual contribution to speech intelligibility in noise. The Journal of the
+  Acoustical Society of America, 26(2), 212-215.
+* Cooke, M., Barker, J., Cunningham, S., & Shao, X. (2006). An audio-visual corpus for speech perception and automatic
+  speech recognition. The Journal of the Acoustical Society of America, 120(5), 2421-2424.
+* Nagrani, A., Chung, J. S., & Zisserman, A. (2020). VoxCeleb: A large-scale speaker identification dataset. In ICASSP
+  2020-2020 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP) (pp. 3084-3088). IEEE.
 
 ## Appendix:
