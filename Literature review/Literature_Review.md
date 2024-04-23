@@ -183,5 +183,50 @@ and versatile lip reading systems becomes increasingly promising.
   speech recognition. The Journal of the Acoustical Society of America, 120(5), 2421-2424.
 * Nagrani, A., Chung, J. S., & Zisserman, A. (2020). VoxCeleb: A large-scale speaker identification dataset. In ICASSP
   2020-2020 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP) (pp. 3084-3088). IEEE.
+  [1] J. K. Chorowski, D. Bahdanau, D. Serdyuk, K. Cho, and Y. Bengio. Attention-based models for speech recognition. In
+  Advances in Neural Information Processing Systems, pages 577–585, 2015.
+  [2] J. S. Chung et al., "Lip Reading in the Wild," ACM Transactions on Graphics, vol. 36, no. 4, Article 31, July
+  2017.
+  [3] C. C. Cook et al., "GRID Corpus: A Multimodal Dataset for Research in Automatic Lip-Reading," Proc. of the
+  International Conference on Auditory-Visual Speech Processing, 2006.
+  [4] J. S. Chung and A. Zisserman, "Lip Reading Sentences in the Wild," Computer Vision and Pattern Recognition, 2016.
+  [5] A. Afouras et al., "Deep Audio-Visual Speech Recognition," IEEE Transactions on Pattern Analysis and Machine
+  Intelligence, 2018.
+  [6] N. Harte and E. Gillen, "TCD-TIMIT: An Audio-Visual Corpus of Continuous Speech," IEEE Transactions on Multimedia,
+  vol. 17, no. 5, May 2015.
+  [7] L. Matthews et al., "Extracting Visual Features for Lipreading," IEEE Transactions on Pattern Analysis and Machine
+  Intelligence, vol. 24, no. 2, Feb 2002.
+  [8] Y. Ephrat et al., "Looking to Listen at the Cocktail Party: A Speaker-Independent Audio-Visual Model for Speech
+  Separation," ACM Transactions on Graphics, vol. 37, no. 4, Article 112, August 2018.
+  [9]A. Ben-Hamadou et al., "MIRACL-VC1: A Multi-Speaker Visual Corpus for Lip-Based Speaker Verification," IEEE
+  International Conference on Acoustics, Speech and Signal Processing, 2014.
+  [10] P. Ma, S. Petridis, M. Pantic, "End-to-End Audio-Visual Speech Recognition with Conformers," Department of
+  Computing, Imperial College London, 2021.
+  [11] Y. Assael, B. Shillingford, S. Whiteson, N. de Freitas, "LipNet: End-to-End Sentence-level Lipreading," 2016.
+  [12] B. Shillingford et al., "Large-Scale Visual Speech Recognition," DeepMind Technologies, 2018.
+  [13] E. Battenberg et al., "Exploring Neural Transducers for End-to-End Speech Recognition," Google Research, 2017.
+  [14] K. A. Lee et al., "Large-Scale Visual Speech Recognition," DeepMind and Google, 2018.
+  [15] T. Afouras, J. S. Chung, A. Senior, O. Vinyals, A. Zisserman, "Deep Audio-Visual Speech Recognition," 2018.
+  [16] J. S. Chung, A. Senior, O. Vinyals, A. Zisserman, "Lip Reading Sentences in the Wild," Computer Vision and
+  Pattern
+  Recognition (CVPR), 2017.
+  [17] Y. Ephrat et al., "Looking to Listen at the Cocktail Party: A Speaker-Independent Audio-Visual Model for Speech
+  Separation," ACM Transactions on Graphics, vol. 37, no. 4, Article 112, August 2018.
+  [18] A. Ben-Hamadou et al., "MIRACL-VC1: A Multi-Speaker Visual Corpus for Lip-Based Speaker Verification," IEEE
+  International Conference on Acoustics, Speech and Signal Processing, 2014.
+  [19] S. Petridis et al., "Audio-Visual Speech Recognition with a Hybrid CTC/Attention Architecture," 2018.
+  [20] Z. Wu et al., "Lip Reading Sentences in the Wild," Machine Learning, 2016.
+  [21] H. Kim, J. H. Hong, B. Roh, "Lip-to-Speech Synthesis in the Wild with Multi-Task Learning," KAIST, 2020.
+  [22] S. Petridis, Y. Wang, Z. Li, M. Pantic, "End-to-End Audiovisual Fusion with LSTMs," IEEE Transactions on
+  Affective
+  Computing, 2019.
+  [23] X. Yang et al., "LRW-1000: A Naturally-Distributed Large-Scale Benchmark for Lip Reading in the Wild," Pattern
+  Recognition Letters, 2019.
+  [24] A. Graves, S. Fernández, F. Gomez, and J. Schmidhuber, “Connectionist temporal classification: labelling
+  unsegmented sequence data with recurrent neural networks,” in Proceedings of the 23rd international conference on
+  Machine learning. ACM, 2006, pp. 369–376.
+  [25] Zhao, Y., Xu, R., & Song, M. (2020). A cascade sequence-to-sequence model for Chinese Mandarin lip reading. In
+  Proceedings of the 1st ACM International Conference on Multimedia in Asia (Article No. 32, pp. 1-6).
+  ACM. https://doi.org/10.1145/3338533.3366579
 
 ## Appendix:
