@@ -43,15 +43,9 @@ class LRModel(nn.Module):
         self.relu3 = nn.ReLU()
         self.pool3 = nn.MaxPool3d(kernel_size=(1, 2, 2))
 
-        # New convolutional layer
-        # self.conv4 = nn.Conv3d(128, 64, kernel_size=(3, 3, 3), padding=(1, 1, 1))
-        # self.relu4 = nn.ReLU()
-        # self.pool4 = nn.MaxPool3d(kernel_size=(1, 2, 2))
-
         self.flatten = nn.Flatten(2, 4)
         self.lstm1 = nn.LSTM(input_size=10200, hidden_size=128, batch_first=True, num_layers=1,
                              bidirectional=True)
-        # self.initialize_lstm_forget_gate_bias(self.lstm1)
         self.dropout1 = nn.Dropout(0.5)
         self.lstm2 = nn.LSTM(input_size=128 * 2, hidden_size=128, batch_first=True, bidirectional=True)
         self.dropout2 = nn.Dropout(0.5)

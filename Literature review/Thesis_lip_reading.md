@@ -826,3 +826,12 @@ translation or speech recognition.
 # List of Abbreviations
 
 # Appendices
+
+A.1 The Online Platform for Lip-Reading
+
+![img_17.png](img_17.png)
+In the online platform, users can choose the video file they want to test the lip-reading model on. The platform
+separates the layout into two sections: the left side displays the video file information (load the video, display the
+alignments) and the right side shows the predicted text and the Word Error Rate (WER), Character Error Rate (CER) as
+well as the accuracy of the model.
+

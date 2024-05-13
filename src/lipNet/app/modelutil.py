@@ -20,7 +20,8 @@ def load_model() -> Sequential:
     model = Sequential()
     # Add a 3D convolutional layer with 128 filters, a kernel size of (3, 3, 3), and input shape of (75, 46, 140, 1)
     # The 'padding' parameter is set to 'same' to ensure that the spatial dimensions of the output remain the same as the input.
-    model.add(Conv3D(128, 3, input_shape=(75, 70, 140, 1), padding='same'))
+    # model.add(Conv3D(128, 3, input_shape=(75, 70, 140, 1), padding='same'))
+    model.add(Conv3D(128, 3, input_shape=(75, 35, 70, 1), padding='same'))
     # Add a ReLU activation function to introduce non-linearity after the convolutional layer.
     model.add(Activation('relu'))
     # Add a 3D max pooling layer with a pool size of (1, 2, 2)
@@ -45,6 +46,7 @@ def load_model() -> Sequential:
 
     model.add(Dense(29, kernel_initializer='he_normal', activation='softmax'))
 
-    model.load_weights(os.path.join('..', 'models', 'lip_reading_baseline_140*70_wer-0.0033.h5'))
+    # model.load_weights(os.path.join('..', 'models', 'lip_reading_baseline_140_70_wer-0.0033.h5'))
+    model.load_weights(os.path.join('..', 'models', 'lip_reading_baseline_70_35.h5'))
 
     return model

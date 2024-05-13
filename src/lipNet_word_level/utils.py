@@ -73,7 +73,6 @@ def mouth_extractor(file_path: str, scale_factor=1.3, min_neighbors=5, mouth_siz
         mean = np.mean(frames_tensor)
         std = np.std(frames)
         frames_tensor = ((frames - mean) / std).astype(np.float16)
-        # frames_tensor = np.expand_dims(frames_tensor, axis=-1)
         # Save as npy file
 
         np.save(base_path + '.npy', frames_tensor)
